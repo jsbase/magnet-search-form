@@ -9,3 +9,5 @@ npm i
 ```
 npm run start
 ```
+
+open your browser and go to [localhost:3000](http://localhost:3000/)

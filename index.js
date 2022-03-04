@@ -22,51 +22,22 @@ const getTorrents = async (req, res) => {
     category = category || '';
     limit = limit || '';
 
-    console.log(` ---  query  -->  ${query}`);
-    console.log(` ---  category  -->  ${category}`);
-    console.log(` ---  limit  -->  ${limit}`);
+    console.log(`\n\n query:  ${query}`);
+    console.log(` category:  ${category}`);
+    console.log(` limit:  ${limit}\n\n`);
     
     const results = await TorrentSearchApi.search(query, category, limit);
     filtered = Array.from(results).filter((x) => parseInt(x?.peers) >= 1 && parseInt(x?.seeds) >= 1);
 
-    console.log('   -> filtered: ', filtered);
-
     res.writeHead(STATUS.success, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(filtered));
 };
-
-/* const getTorrents = async (req, res) => {
-    const {  
-        query,  
-        category,
-        limit
-    } = req.query;
-
-    console.log(` ---  query  -->  ${query}`);
-    console.log(` ---  category  -->  ${category}`);
-    console.log(` ---  limit  -->  ${limit}`);
-
-    const results = await TorrentSearchApi.search(
-        query || '',
-        category || 'All',
-        limit || '10'
-    );
-
-    //const filtered = Array.from(results).filter((x) => parseInt(x?.peers) >= 1 && parseInt(x?.seeds) >= 1);
-    //const torrents = JSON.stringify(filtered);
-    
-    const torrents = JSON.stringify(results);
-
-    res.writeHead(STATUS.success, { 'Content-Type': 'application/json' });
-    res.end(torrents);  
-}; */
 
 polka()
     .use(json())
     .use(cookieParser())
     .use(morgan('dev'))
     .use(serve)
-    //.get('/torrents', getTorrents)
     .get('/torrents', getTorrents)
     .listen(PORT, (err) => {
         if (err) {

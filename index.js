@@ -1,13 +1,15 @@
 const { join } = require('path'),
-    { json } = require('body-parser'),
     polka = require('polka'),
     cookieParser = require('cookie-parser'),
     morgan = require('morgan'),
+    cors = require('cors'),
+    bodyParser = require('body-parser'),
     TorrentSearchApi = require('torrent-search-api'),
     dir = join(__dirname, 'public'),
     serve = require('serve-static')(dir),
     STATUS = { success: 200, fail: 404 },
     PORT = process.env.PORT || 3000;
+
 
 TorrentSearchApi.enablePublicProviders();
 
@@ -34,9 +36,10 @@ const getTorrents = async (req, res) => {
 };
 
 polka()
-    .use(json())
+    .use(cors())
+    .use(bodyParser())
     .use(cookieParser())
-    .use(morgan('dev'))
+    .use(morgan('tiny'))
     .use(serve)
     .get('/torrents', getTorrents)
     .listen(PORT, (err) => {

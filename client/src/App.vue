@@ -1,17 +1,15 @@
 <template>
-    <div id="app">
-        <img alt="Vue logo" src="./assets/logo.png" />
-        <HelloWorld msg="Welcome to Your Vue.js App" />
-    </div>
+    <h1>magnet search</h1>
+    <!--    <SearchForm />-->
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue';
+//import SearchForm from './components/SearchForm.vue';
 
 export default {
     name: 'App',
     components: {
-        HelloWorld,
+        // SearchForm,
     },
 };
 </script>
@@ -22,7 +20,10 @@ export default {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
-    color: #2c3e50;
-    margin-top: 60px;
+    color: tomato;
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: stretch;
+    justify-content: stretch;
 }
 </style>

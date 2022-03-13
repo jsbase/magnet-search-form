@@ -37,7 +37,7 @@ const getTorrents = async (req, res) => {
 
 polka()
     .use(cors())
-    .use(bodyParser())
+    .use(bodyParser.json())
     .use(cookieParser())
     .use(morgan('tiny'))
     .use(serve)

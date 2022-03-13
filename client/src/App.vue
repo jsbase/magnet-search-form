@@ -1,15 +1,15 @@
 <template>
     <h1>magnet search</h1>
-    <!--    <SearchForm />-->
+    <SearchForm></SearchForm>
 </template>
 
 <script>
-//import SearchForm from './components/SearchForm.vue';
+import SearchForm from './components/SearchForm.vue';
 
 export default {
     name: 'App',
     components: {
-        // SearchForm,
+        SearchForm,
     },
 };
 </script>

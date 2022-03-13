@@ -10,24 +10,23 @@ const { join } = require('path'),
     STATUS = { success: 200, fail: 404 },
     PORT = process.env.PORT || 3000;
 
-
 TorrentSearchApi.enablePublicProviders();
 
 const getTorrents = async (req, res) => {
     let {
-        query,  
+        query,
         category,
         limit
     } = req.query;
 
-    query = query || '';
-    category = category || '';
-    limit = limit || '';
+    query = query || 'free';
+    category = category || 'all';
+    limit = limit || '25';
 
     console.log(`\n\n query:  ${query}`);
     console.log(` category:  ${category}`);
     console.log(` limit:  ${limit}\n\n`);
-    
+
     const results = await TorrentSearchApi.search(query, category, limit);
     filtered = Array.from(results).filter((x) => parseInt(x?.peers) >= 1 && parseInt(x?.seeds) >= 1);
 
@@ -42,6 +41,7 @@ polka()
     .use(morgan('tiny'))
     .use(serve)
     .get('/torrents', getTorrents)
+    //.post('/torrents', getTorrents)
     .listen(PORT, (err) => {
         if (err) {
             throw err;

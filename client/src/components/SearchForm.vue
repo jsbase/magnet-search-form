@@ -1,118 +1,126 @@
 <template>
-    <div>
+    <section>
+        <h1>magnet search</h1>
+
         <form @submit.prevent="onSubmit" class="mb-3">
             <div v-if="error" class="alert alert-dismissible alert-warning">
-                <button type="button" class="close" data-dismiss="alert">
-                    ×
-                </button>
+                <button type="button" class="close">close</button>
                 <h4 class="alert-heading">Error!</h4>
                 <p class="mb-0">{{ error }}</p>
             </div>
             <div class="form-group">
-                <label for="term">Search</label>
+                <label for="query">Search</label>
                 <input
-                    v-model="item.term"
+                    id="query"
+                    v-model="fetchedData.title"
                     type="text"
                     class="form-control"
-                    id="term"
+                    placeholder="What are you looking for?"
                     required
                 />
             </div>
             <div class="form-group">
                 <label for="subject">Category</label>
                 <input
-                    v-model="item.category"
+                    id="category"
+                    v-model="fetchedData.category"
                     type="text"
                     class="form-control"
-                    id="category"
-                    placeholder="Enter a category"
-                    required
+                    placeholder="e.g. Movies, Apps, All"
                 />
             </div>
             <div class="form-group">
-                <label for="amount">Amount</label>
+                <label for="limit">Results to show</label>
                 <input
-                    v-model="item.amount"
+                    v-model="fetchedData.limit"
                     type="number"
                     class="form-control"
-                    id="amount"
-                    placeholder="How many results?"
+                    id="limit"
+                    placeholder="e.g. 10, 50, 100"
                 />
             </div>
-            <button type="submit" class="btn btn-primary">Add Message</button>
+            <button type="submit" class="btn btn-primary">Search</button>
         </form>
-        <div class="list-unstyled" v-for="item in fetchedData" :key="item._id">
-            <li class="media">
-                <img
-                    v-if="message.imageURL"
-                    class="mr-3"
-                    :src="message.imageURL"
-                    :alt="message.subject"
-                />
-                <div class="media-body">
-                    <h4 class="mt-0 mb-1">{{ item.title }}</h4>
-                    <p class="mt-0 mb-1">Peers: {{ item.peers }}</p>
-                    <br />
-                    <a href="{{ item.url }}">{{ item.url }}</a>
-                </div>
+
+        <ul v-for="item in fetchedData" :key="item.time">
+            <li>
+                <h4 v-if="item.title" class="mt-0 mb-1">{{ item.title }}</h4>
+                <p v-if="item.seeds" class="mt-0 mb-1">
+                    Seeds: {{ item.seeds }}
+                </p>
+                <p v-if="item.peers" class="mt-0 mb-1">
+                    Peers: {{ item.peers }}
+                </p>
+                <br />Tracker Link:
+                <a :href="item.desc">{{ item.desc }}</a>
             </li>
-            <hr />
-        </div>
-    </div>
+        </ul>
+    </section>
 </template>
 
 <script>
-const API_URL = 'http://localhost:3000/torrents';
+//const URL = `${process.env.API_HOST}:${process.env.API_PORT}/${process.env.API_TORRENT_PATH}`;
+const URL = 'http://localhost:3000/torrents';
+
+const schema = {
+    query: 'free',
+    category: 'all',
+    limit: 25,
+};
+
+const getRequestBody = (form) => {
+    const requestBody = new URLSearchParams();
+
+    for (const pair of new FormData(form)) {
+        requestBody.append(pair[0], pair[1]);
+    }
+
+    return JSON.stringify(requestBody);
+};
 
 export default {
     name: 'SearchForm',
     data: () => ({
-        error: '',
         fetchedData: [],
-        formData: {
-            term: '1080p',
-            category: 'all',
-            amount: 50,
-        },
+        formData: schema,
+        error: '',
+        showForm: true,
     }),
     computed: {
-        reversedMessages() {
-            return this.fetchedData.slice().reverse();
+        log() {
+            return console.log(`computed: ${URL}`);
         },
     },
     mounted() {
-        fetch(API_URL)
+        fetch(URL)
             .then((response) => response.json())
             .then((result) => {
                 this.fetchedData = result;
             });
     },
     methods: {
-        onSubmit(evt) {
-            const fData = new FormData(evt.target);
+        onSubmit(event) {
+            console.log('onSubmit: ', event);
 
-            console.log(JSON.stringify(fData));
+            const body = getRequestBody(event.target);
+            const headers = { 'content-type': 'application/json' };
 
-            fetch(API_URL, {
-                method: 'POST',
-                body: JSON.stringify(fData),
-                headers: {
-                    'content-type': 'application/json',
-                },
-            })
+            console.log('body: ', body);
+
+            fetch(URL, { method: 'GET', body, headers })
                 .then((response) => response.json())
                 .then((result) => {
-                    if (result.details) {
-                        // there was an error...
-                        const error = result.details
-                            .map((detail) => detail.message)
-                            .join('. ');
-                        this.error = error;
-                    } else {
-                        this.error = '';
-                        this.showForm = false;
-                        this.fetchedData.push(result);
-                    }
+                    console.log('result: ', result);
+
+                    this.error = '';
+
+                    this.showForm = false;
+
+                    this.fetchedData.push(result);
+                })
+                .catch((err) => {
+                    this.error = `Error: ${err}`;
+                    console.err(this.error);
                 });
         },
     },
@@ -120,8 +128,10 @@ export default {
 </script>
 
 <style>
-img {
-    height: auto;
-    max-width: 300px;
+h1 {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    font-size: 4em;
+    text-decoration: none;
 }
 </style>

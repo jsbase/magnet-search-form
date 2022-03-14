@@ -13,7 +13,8 @@ const { join } = require('path'),
 TorrentSearchApi.enablePublicProviders();
 
 const getTorrents = async (req, res) => {
-    condole.log(JSON.stringify(req));
+    console.log(JSON.stringify(req));
+    console.log(JSON.stringify(req));
 
     let {
         query,

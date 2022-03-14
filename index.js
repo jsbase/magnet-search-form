@@ -12,8 +12,8 @@ const { join } = require('path'),
 
 TorrentSearchApi.enablePublicProviders();
 
-const getTorrents = async (req, res) {
-    console.log('request: ', req);
+const getTorrents = async (req, res) => {
+    console.log('GET: ', req);
 
     let {
         query,
@@ -37,7 +37,7 @@ const getTorrents = async (req, res) {
 };
 
 const postTorrents = async (req, res) => {
-    console.log('request: ', req);
+    console.log('POST: ', req);
 
      const payload = JSON.parse(req.body);
  

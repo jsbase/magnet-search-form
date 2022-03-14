@@ -3,7 +3,7 @@ const { join } = require('path'),
     cookieParser = require('cookie-parser'),
     morgan = require('morgan'),
     cors = require('cors'),
-    bodyParser = require('body-parser'),
+    { json } = require('body-parser'),
     TorrentSearchApi = require('torrent-search-api'),
     dir = join(__dirname, 'public'),
     serve = require('serve-static')(dir),
@@ -13,11 +13,13 @@ const { join } = require('path'),
 TorrentSearchApi.enablePublicProviders();
 
 const getTorrents = async (req, res) => {
+    condole.log(JSON.stringify(req));
+
     let {
         query,
         category,
         limit
-    } = req.query;
+    } = req.query || req.body;
 
     query = query || 'free';
     category = category || 'all';
@@ -36,12 +38,12 @@ const getTorrents = async (req, res) => {
 
 polka()
     .use(cors())
-    .use(bodyParser.json())
+    .use(json())
+    .get('/torrents', getTorrents)
+    .post('/torrents', getTorrents)
+    .use(serve)
     .use(cookieParser())
     .use(morgan('tiny'))
-    .use(serve)
-    .get('/torrents', getTorrents)
-    //.post('/torrents', getTorrents)
     .listen(PORT, (err) => {
         if (err) {
             throw err;

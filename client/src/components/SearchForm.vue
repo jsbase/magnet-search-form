@@ -107,7 +107,7 @@ export default {
 
             console.log('body: ', body);
 
-            fetch(URL, { method: 'GET', body, headers })
+            fetch(URL, { method: 'POST', body, headers })
                 .then((response) => response.json())
                 .then((result) => {
                     console.log('result: ', result);

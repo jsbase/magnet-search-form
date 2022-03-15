@@ -13,8 +13,6 @@ const { join } = require('path'),
 TorrentSearchApi.enablePublicProviders();
 
 const getTorrents = async (req, res) => {
-    console.log('GET: ', req);
-
     let {
         query,
         category,
@@ -37,10 +35,12 @@ const getTorrents = async (req, res) => {
 };
 
 const postTorrents = async (req, res) => {
-    console.log('POST: ', req);
+    let { payload } = req.body;
+    payload = payload || {};
 
-     const payload = JSON.parse(req.body);
- 
+    console.log(`\n\n payload: ${JSON.stringify(payload)}`);
+
+    /* 
     query = payload.query || 'free';
     category = payload.category || 'all';
     limit = payload.limit || '25';
@@ -51,19 +51,20 @@ const postTorrents = async (req, res) => {
  
     const results = await TorrentSearchApi.search(query, category, limit);
     filtered = Array.from(results).filter((x) => parseInt(x?.peers) >= 1 && parseInt(x?.seeds) >= 1);
- 
+    */
+
     res.writeHead(STATUS.success, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(filtered));
+    res.end(JSON.stringify(payload));
 };
 
 polka()
+    .use(morgan('tiny'))
     .use(cors())
     .use(json())
-    .get('/torrents', getTorrents)
-    .post('/torrents', postTorrents)
     .use(serve)
     .use(cookieParser())
-    .use(morgan('tiny'))
+    .get('/torrents', getTorrents)
+    .post('/torrents', postTorrents)
     .listen(PORT, (err) => {
         if (err) {
             throw err;

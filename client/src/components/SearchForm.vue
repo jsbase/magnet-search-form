@@ -12,7 +12,7 @@
                 <label for="query">Search</label>
                 <input
                     id="query"
-                    v-model="fetchedData.title"
+                    v-model="fetchedData.query"
                     type="text"
                     class="form-control"
                     placeholder="What are you looking for?"
@@ -42,17 +42,12 @@
             <button type="submit" class="btn btn-primary">Search</button>
         </form>
 
-        <ul v-for="item in fetchedData" :key="item.time">
+        <ul v-for="magnet in fetchedData">
             <li>
-                <h4 v-if="item.title" class="mt-0 mb-1">{{ item.title }}</h4>
-                <p v-if="item.seeds" class="mt-0 mb-1">
-                    Seeds: {{ item.seeds }}
-                </p>
-                <p v-if="item.peers" class="mt-0 mb-1">
-                    Peers: {{ item.peers }}
-                </p>
-                <br />Tracker Link:
-                <a :href="item.desc">{{ item.desc }}</a>
+                <h4 v-if="magnet.title" class="mt-0 mb-1">{{ magnet.title }}</h4>
+                <p v-if="magnet.seeds" class="mt-0 mb-1">Seeds: {{ magnet.seeds }}</p>
+                <p v-if="magnet.peers" class="mt-0 mb-1">Peers: {{ magnet.peers }}</p>
+                <p>Tracker Link: <a :href="magnet.desc">{{ magnet.desc }}</a></p>
             </li>
         </ul>
     </section>
@@ -68,14 +63,20 @@ const schema = {
     limit: 25,
 };
 
-const getRequestBody = (form) => {
-    const requestBody = new URLSearchParams();
+const getUrlParams = (form) => {
+    const urlParams = new URLSearchParams();
 
     for (const pair of new FormData(form)) {
-        requestBody.append(pair[0], pair[1]);
+        urlParams.append(pair[0], pair[1]);
     }
 
-    return JSON.stringify(requestBody);
+    return JSON.stringify(urlParams);
+};
+
+const requestMagnets = async (url, opts) => {
+    const response = await fetch(url, opts);
+
+    return await response.json();
 };
 
 export default {
@@ -86,42 +87,36 @@ export default {
         error: '',
         showForm: true,
     }),
-    computed: {
-        log() {
-            return console.log(`computed: ${URL}`);
-        },
-    },
+    // computed: { log() { return console.log(`computed: ${URL}`); } },
     mounted() {
-        fetch(URL)
-            .then((response) => response.json())
-            .then((result) => {
-                this.fetchedData = result;
-            });
+        const urlParams = getUrlParams(event.target);
+
+        console.log('urlParams: ', JSON.stringify(urlParams));
+
+        const headers = { 'content-type': 'application/json' };
+        const magnets = requestMagnetsU(URL, {
+            headers, method: 'GET',
+        });
+
+        console.log('magnets: ', JSON.stringify(magnets));
+
+        this.fetchedData.push(magnets);
     },
     methods: {
-        onSubmit(event) {
-            console.log('onSubmit: ', event);
+        onSubmit: async (event) => {
+            event.preventDefault();
 
-            const body = getRequestBody(event.target);
+            this.formData = new FormData(event.target);
+
             const headers = { 'content-type': 'application/json' };
+            const magnets = requestMagnetsU(URL, {
+                headers, method: 'POST',
+                body: formData,
+            });
 
-            console.log('body: ', body);
+            console.log('magnets: ', JSON.stringify(magnets));
 
-            fetch(URL, { method: 'POST', body, headers })
-                .then((response) => response.json())
-                .then((result) => {
-                    console.log('result: ', result);
-
-                    this.error = '';
-
-                    this.showForm = false;
-
-                    this.fetchedData.push(result);
-                })
-                .catch((err) => {
-                    this.error = `Error: ${err}`;
-                    console.err(this.error);
-                });
+            this.fetchedData.push(magnets);
         },
     },
 };
@@ -133,5 +128,15 @@ h1 {
     margin-bottom: 1rem;
     font-size: 4em;
     text-decoration: none;
+}
+
+ul {
+    list-style-type: none;
+    list-style-position: outside;
+}
+
+li {
+    margin-top: 1rem;
+    border: 1px solid #d1d1d1;
 }
 </style>

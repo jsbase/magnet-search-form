@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "node index"
+    "start": "concurrently \"node index.js\" \"cd client && npm run serve\""
   },
   "dependencies": {
     "@polka/send": "^0.4.0",

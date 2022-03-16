@@ -6,13 +6,13 @@
             <div v-if="error" class="alert alert-dismissible alert-warning">
                 <button type="button" class="close">close</button>
                 <h4 class="alert-heading">Error!</h4>
-                <p class="mb-0">{{ error }}</p>
+                <!--<p class="mb-0">{{ error }}</p>-->
             </div>
             <div class="form-group">
-                <label for="query">Search</label>
+                <label for="title">Search</label>
                 <input
-                    id="query"
-                    v-model="fetchedData.query"
+                    id="title"
+                    v-model="fetchedData.title"
                     type="text"
                     class="form-control"
                     placeholder="What are you looking for?"
@@ -42,12 +42,19 @@
             <button type="submit" class="btn btn-primary">Search</button>
         </form>
 
-        <ul v-for="magnet in fetchedData">
+        <ul v-for="magnet in fetchedData" v-bind:key>
             <li>
                 <h4 v-if="magnet.title" class="mt-0 mb-1">{{ magnet.title }}</h4>
-                <p v-if="magnet.seeds" class="mt-0 mb-1">Seeds: {{ magnet.seeds }}</p>
-                <p v-if="magnet.peers" class="mt-0 mb-1">Peers: {{ magnet.peers }}</p>
-                <p>Tracker Link: <a :href="magnet.desc">{{ magnet.desc }}</a></p>
+                <p v-if="magnet.seeds" class="mt-0 mb-1">
+                    Seeds: {{ magnet.seeds }}
+                </p>
+                <p v-if="magnet.peers" class="mt-0 mb-1">
+                    Peers: {{ magnet.peers }}
+                </p>
+                <p>
+                    Tracker Link: 
+                    <a :href="magnet.desc">{{ magnet.desc }}</a>
+                </p>
             </li>
         </ul>
     </section>
@@ -55,7 +62,7 @@
 
 <script>
 //const URL = `${process.env.API_HOST}:${process.env.API_PORT}/${process.env.API_TORRENT_PATH}`;
-const URL = 'http://localhost:3000/torrents';
+const URL = 'http://localhost:3000';
 
 const schema = {
     query: 'free',
@@ -84,8 +91,8 @@ export default {
     data: () => ({
         fetchedData: [],
         formData: schema,
-        error: '',
         showForm: true,
+        error: '',
     }),
     // computed: { log() { return console.log(`computed: ${URL}`); } },
     mounted() {
@@ -94,8 +101,10 @@ export default {
         console.log('urlParams: ', JSON.stringify(urlParams));
 
         const headers = { 'content-type': 'application/json' };
-        const magnets = requestMagnetsU(URL, {
-            headers, method: 'GET',
+        const magnets = requestMagnets(`${URL}/get`, {
+            headers,
+            method: 'GET',
+            query: JSON.stringify(urlParams),
         });
 
         console.log('magnets: ', JSON.stringify(magnets));
@@ -108,10 +117,11 @@ export default {
 
             this.formData = new FormData(event.target);
 
-            const headers = { 'content-type': 'application/json' };
-            const magnets = requestMagnetsU(URL, {
-                headers, method: 'POST',
-                body: formData,
+            const headers = { 'content-type': 'application/x-www-form-urlencoded' };
+            const magnets = requestMagnets(`${URL}/post`, {
+                headers,
+                method: 'POST',
+                body: this.formData,
             });
 
             console.log('magnets: ', JSON.stringify(magnets));

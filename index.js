@@ -1,8 +1,9 @@
 const { join } = require('path'),
     polka = require('polka'),
-    cookieParser = require('cookie-parser'),
-    morgan = require('morgan'),
+    send = require('@polka/send'),
     cors = require('cors'),
+    morgan = require('morgan'),
+    cookieParser = require('cookie-parser'),
     { json } = require('body-parser'),
     TorrentSearchApi = require('torrent-search-api'),
     dir = join(__dirname, 'public'),
@@ -12,7 +13,7 @@ const { join } = require('path'),
 
 TorrentSearchApi.enablePublicProviders();
 
-const getTorrents = async (req, res) => {
+const getMagnets = async (req, res) => {
     let {
         query,
         category,
@@ -28,17 +29,23 @@ const getTorrents = async (req, res) => {
     console.log(` limit:  ${limit}\n\n`);
 
     const results = await TorrentSearchApi.search(query, category, limit);
-    filtered = Array.from(results).filter((x) => parseInt(x?.peers) >= 1 && parseInt(x?.seeds) >= 1);
+//    filtered = Array.from(results).filter((x) => parseInt(x?.peers) >= 1 && parseInt(x?.seeds) >= 1);
 
-    res.writeHead(STATUS.success, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(filtered));
+    send(STATUS.success, JSON.stringify(results));
+    /*    
+    res.writeHead(STATUS.success, {
+        'Content-Type': 'application/json',
+    });
+
+    res.end(JSON.stringify(results));
+    */
 };
 
-const postTorrents = async (req, res) => {
+const postMagnets = async (req, res) => {
     let { payload } = req.body;
     payload = payload || {};
 
-    console.log(`\n\n payload: ${JSON.stringify(payload)}`);
+    console.log(`\n\n payload: `, payload);
 
     /* 
     query = payload.query || 'free';
@@ -60,14 +67,13 @@ const postTorrents = async (req, res) => {
 polka()
     .use(morgan('tiny'))
     .use(cors())
-    .use(json())
-    .use(serve)
     .use(cookieParser())
-    .get('/torrents', getTorrents)
-    .post('/torrents', postTorrents)
+    //.use(polka.urlencoded({ extended: true }))
+    .use(json())
+    .get('/get', getMagnets)
+    .post('/post', postMagnets)
+    .use(serve)
     .listen(PORT, (err) => {
-        if (err) {
-            throw err;
-        }
+        if (err) { throw err; }
         console.log('Server running on localhost:' + PORT);
     });

@@ -1,21 +1,35 @@
 const { join } = require('path'),
-    polka = require('polka'),
-    send = require('@polka/send'),
+    { createServer } = require('https'),
+    { readFileSync } = require('fs'),
+    server = require('polka'),
+    //send = require('@polka/send'),
     cors = require('cors'),
     morgan = require('morgan'),
     cookieParser = require('cookie-parser'),
     { json } = require('body-parser'),
-    TorrentSearchApi = require('torrent-search-api'),
     dir = join(__dirname, 'public'),
     serve = require('serve-static')(dir),
-    STATUS = {
-       success: 200,
-       empty: 400,
-       fail: 404,
-    },
-    PORT = process.env.PORT || 3000;
+    TorrentSearchApi = require('torrent-search-api').enablePublicProviders();
 
-TorrentSearchApi.enablePublicProviders();
+const PORT = process.env.PORT || 3000;
+
+const STATUS = {
+   success: 200,
+   empty: 400,
+   fail: 404,
+};
+    
+const options = {
+    key: readFileSync('ssl/magnet-search-form.key'),
+    cert: readFileSync('ssl/magnet-search-form.crt'),
+};
+
+/*
+const load = async (type) => {
+    const result = await fetch(`${URL}/${type}`);
+    return (await result.json());
+};
+*/
 
 const getMagnets = async (req, res) => {
     let {
@@ -23,53 +37,6 @@ const getMagnets = async (req, res) => {
         category,
         limit,
     } = req.query;
-
-    query = query || 'free';
-    category = category || 'all';
-    limit = limit || '25';
-
-    console.log(`\n\n query:  ${query}`);
-    console.log(` category:  ${category}`);
-    console.log(` limit:  ${limit}\n\n`);
-
-    const result = await (
-        TorrentSearchApi.search(query, category, limit)
-    );
-
-    //filtered = Array.from(results).filter((x) => parseInt(x?.peers) >= 1 && parseInt(x?.seeds) >= 1);
-
-    await send(
-        STATUS.success,
-        JSON.stringify(result)
-    );
-
-    /*    
-    res.writeHead(STATUS.success, {
-        'Content-Type': 'application/json',
-    });
-
-    res.end(JSON.stringify(results));
-    */
-};
-
-const postMagnets = async (req, res) => {
-    if (!req.body || !req.body.query) {
-        const message = {
-            message: "Content can not be empty!",
-        });
-
-        await (send(STATUS.empty, msg));
-
-        res.end(msg);
-    }
-
-    // else:
-
-    let {
-        query,
-        category,
-    	limit,
-    } = req.body;
 
     query = query || 'manjaro';
     category = category || 'apps';
@@ -79,22 +46,61 @@ const postMagnets = async (req, res) => {
     console.log(` category:  ${category}`);
     console.log(` limit:  ${limit}\n\n`);
 
-    const result = (await TorrentSearchApi.search(
-        query, category, limit
-    ));
-
+    const result = (await TorrentSearchApi.search(query, category, limit));
     //filtered = Array.from(results).filter((x) => parseInt(x?.peers) >= 1 && parseInt(x?.seeds) >= 1);
+
+    // send(STATUS.success, JSON.stringify(result));
 
     res.writeHead(STATUS.success, {
         'Content-Type': 'application/json',
     });
 
-    res.end(
-        JSON.stringify(result)
-    );
+    res.end(JSON.stringify(results));
 };
 
-polka()
+const postMagnets = async (req, res) => {
+    if (!req.body || !req.body.query) {
+        const msg = {
+            message: "Content can not be empty!",
+        };
+
+        //send(msg, STATUS.empty);
+
+        res.writeHead(STATUS.empty, {
+            'Content-Type': 'application/json',
+        });
+
+        res.end(JSON.stringify(msg));
+    } else {
+        let {
+            query,
+            category,
+    	    limit,
+        } = req.body;
+
+        query = query || 'manjaro';
+        category = category || 'apps';
+        limit = limit || '3';
+
+        console.log(`\n\n query:  ${query}`);
+        console.log(` category:  ${category}`);
+        console.log(` limit:  ${limit}\n\n`);
+
+        const result = (
+            await TorrentSearchApi.search(query, limit)
+        );
+
+        //filtered = Array.from(results).filter((x) => parseInt(x?.peers) >= 1 && parseInt(x?.seeds) >= 1);
+
+        res.writeHead(STATUS.success, {
+            'Content-Type': 'application/json',
+        });
+
+        res.end(JSON.stringify(result));
+    }
+};
+
+const { handler } = server()
     .use(morgan('tiny'))
     .use(cors())
     .use(cookieParser())
@@ -102,8 +108,10 @@ polka()
     .use(json())
     .get('/get', getMagnets)
     .post('/post', postMagnets)
-    .use(serve)
-    .listen(PORT, (err) => {
-        if (err) { throw err; }
-        console.log('Server running on localhost:' + PORT);
-    });
+    .use(serve);
+
+createServer(options, handler).listen(PORT, (err) => {
+	if (err) { throw err; }
+
+	console.log(`Server running on localhost:${PORT}`);
+});

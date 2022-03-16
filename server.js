@@ -1,6 +1,6 @@
 const { join } = require('path'),
-    { createServer } = require('https'),
-    { readFileSync } = require('fs'),
+    //{ createServer } = require('https'),
+    //{ readFileSync } = require('fs'),
     server = require('polka'),
     //send = require('@polka/send'),
     cors = require('cors'),
@@ -9,7 +9,7 @@ const { join } = require('path'),
     { json } = require('body-parser'),
     dir = join(__dirname, 'public'),
     serve = require('serve-static')(dir),
-    TorrentSearchApi = require('torrent-search-api').enablePublicProviders();
+    TorrentSearchApi = require('torrent-search-api');
 
 const PORT = process.env.PORT || 3000;
 
@@ -19,17 +19,21 @@ const STATUS = {
    fail: 404,
 };
     
+/*
+// https options
 const options = {
     key: readFileSync('ssl/magnet-search-form.key'),
     cert: readFileSync('ssl/magnet-search-form.crt'),
 };
 
-/*
+// dynamic request
 const load = async (type) => {
     const result = await fetch(`${URL}/${type}`);
     return (await result.json());
 };
 */
+
+TorrentSearchApi.enablePublicProviders();
 
 const getMagnets = async (req, res) => {
     let {
@@ -46,7 +50,7 @@ const getMagnets = async (req, res) => {
     console.log(` category:  ${category}`);
     console.log(` limit:  ${limit}\n\n`);
 
-    const result = (await TorrentSearchApi.search(query, category, limit));
+    const result = await TorrentSearchApi.search(query, category, limit);
     //filtered = Array.from(results).filter((x) => parseInt(x?.peers) >= 1 && parseInt(x?.seeds) >= 1);
 
     // send(STATUS.success, JSON.stringify(result));
@@ -55,7 +59,7 @@ const getMagnets = async (req, res) => {
         'Content-Type': 'application/json',
     });
 
-    res.end(JSON.stringify(results));
+    res.end(JSON.stringify(result));
 };
 
 const postMagnets = async (req, res) => {
@@ -100,18 +104,21 @@ const postMagnets = async (req, res) => {
     }
 };
 
-const { handler } = server()
+/* const { handler } = */server()
     .use(morgan('tiny'))
     .use(cors())
     .use(cookieParser())
-    //.use(polka.urlencoded({ extended: true }))
     .use(json())
-    .get('/get', getMagnets)
-    .post('/post', postMagnets)
-    .use(serve);
+    .get('/magnets', getMagnets)
+    .post('/magnets', postMagnets)
+    .use(serve).listen(PORT, err => {
+        if (err) { throw err; }
+        console.log(`Server running on localhost:${PORT}`);
+    });
 
+/*
 createServer(options, handler).listen(PORT, (err) => {
 	if (err) { throw err; }
-
 	console.log(`Server running on localhost:${PORT}`);
 });
+*/

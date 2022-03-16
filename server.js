@@ -8,7 +8,11 @@ const { join } = require('path'),
     TorrentSearchApi = require('torrent-search-api'),
     dir = join(__dirname, 'public'),
     serve = require('serve-static')(dir),
-    STATUS = { success: 200, fail: 404 },
+    STATUS = {
+       success: 200,
+       empty: 400,
+       fail: 404,
+    },
     PORT = process.env.PORT || 3000;
 
 TorrentSearchApi.enablePublicProviders();
@@ -17,7 +21,7 @@ const getMagnets = async (req, res) => {
     let {
         query,
         category,
-        limit
+        limit,
     } = req.query;
 
     query = query || 'free';
@@ -28,10 +32,17 @@ const getMagnets = async (req, res) => {
     console.log(` category:  ${category}`);
     console.log(` limit:  ${limit}\n\n`);
 
-    const results = await TorrentSearchApi.search(query, category, limit);
-//    filtered = Array.from(results).filter((x) => parseInt(x?.peers) >= 1 && parseInt(x?.seeds) >= 1);
+    const result = await (
+        TorrentSearchApi.search(query, category, limit)
+    );
 
-    send(STATUS.success, JSON.stringify(results));
+    //filtered = Array.from(results).filter((x) => parseInt(x?.peers) >= 1 && parseInt(x?.seeds) >= 1);
+
+    await send(
+        STATUS.success,
+        JSON.stringify(result)
+    );
+
     /*    
     res.writeHead(STATUS.success, {
         'Content-Type': 'application/json',
@@ -42,26 +53,45 @@ const getMagnets = async (req, res) => {
 };
 
 const postMagnets = async (req, res) => {
-    let { payload } = req.body;
-    payload = payload || {};
+    if (!req.body || !req.body.query) {
+        const message = {
+            message: "Content can not be empty!",
+        });
 
-    console.log(`\n\n payload: `, payload);
+        await (send(STATUS.empty, msg));
 
-    /* 
-    query = payload.query || 'free';
-    category = payload.category || 'all';
-    limit = payload.limit || '25';
- 
+        res.end(msg);
+    }
+
+    // else:
+
+    let {
+        query,
+        category,
+    	limit,
+    } = req.body;
+
+    query = query || 'manjaro';
+    category = category || 'apps';
+    limit = limit || '3';
+
     console.log(`\n\n query:  ${query}`);
     console.log(` category:  ${category}`);
     console.log(` limit:  ${limit}\n\n`);
- 
-    const results = await TorrentSearchApi.search(query, category, limit);
-    filtered = Array.from(results).filter((x) => parseInt(x?.peers) >= 1 && parseInt(x?.seeds) >= 1);
-    */
 
-    res.writeHead(STATUS.success, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(payload));
+    const result = (await TorrentSearchApi.search(
+        query, category, limit
+    ));
+
+    //filtered = Array.from(results).filter((x) => parseInt(x?.peers) >= 1 && parseInt(x?.seeds) >= 1);
+
+    res.writeHead(STATUS.success, {
+        'Content-Type': 'application/json',
+    });
+
+    res.end(
+        JSON.stringify(result)
+    );
 };
 
 polka()

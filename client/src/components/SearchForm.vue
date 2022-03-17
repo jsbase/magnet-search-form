@@ -2,57 +2,65 @@
     <section>
         <h1>magnet search</h1>
 
-        <form @submit.prevent="onSubmit" class="mb-3">
+        <form
+            class="mb-3"
+            method="POST"
+            action="/magnets"
+            @submit.prevent="onSubmit"
+        >
             <div v-if="error" class="alert alert-dismissible alert-warning">
                 <button type="button" class="close">close</button>
                 <h4 class="alert-heading">Error!</h4>
-                <!--<p class="mb-0">{{ error }}</p>-->
+                <p v-if="error" class="mb-0">{{ error }}</p>
             </div>
             <div class="form-group">
-                <label for="title">Search</label>
+                <label for="query">Search</label>
                 <input
-                    id="title"
-                    v-model="fetchedData.title"
-                    type="text"
+                    v-model="fetchedData.query"
+                    id="query"
                     class="form-control"
+                    type="text"
                     placeholder="What are you looking for?"
                     required
                 />
             </div>
             <div class="form-group">
-                <label for="subject">Category</label>
+                <label for="category">Category</label>
                 <input
-                    id="category"
                     v-model="fetchedData.category"
-                    type="text"
+                    id="category"
                     class="form-control"
+                    type="text"
                     placeholder="e.g. Movies, Apps, All"
                 />
             </div>
             <div class="form-group">
-                <label for="limit">Results to show</label>
+                <label for="limit">Limit</label>
                 <input
                     v-model="fetchedData.limit"
-                    type="number"
-                    class="form-control"
                     id="limit"
+                    class="form-control"
+                    type="number"
                     placeholder="e.g. 10, 50, 100"
                 />
             </div>
             <button type="submit" class="btn btn-primary">Search</button>
         </form>
-
-        <ul v-for="magnet in fetchedData" v-bind:key>
+        <ul v-for="magnet in fetchedData" :key="magnet.title">
             <li>
-                <h4 v-if="magnet.title" class="mt-0 mb-1">{{ magnet.title }}</h4>
+                <h4 v-if="magnet.title" class="mt-0 mb-1">
+                    {{ magnet.title }}
+                </h4>
                 <p v-if="magnet.seeds" class="mt-0 mb-1">
-                    Seeds: {{ magnet.seeds }}
+                    <span>Seeds: </span>
+                    {{ magnet.seeds }}
                 </p>
                 <p v-if="magnet.peers" class="mt-0 mb-1">
-                    Peers: {{ magnet.peers }}
+                    <span>Peers: </span>
+                    {{ magnet.peers }}
                 </p>
                 <p>
-                    Tracker Link: 
+                    <span>Tracker Link: </span>
                     <a :href="magnet.desc">{{ magnet.desc }}</a>
                 </p>
             </li>
@@ -61,13 +69,13 @@
 </template>
 
 <script>
-//const URL = `${process.env.API_HOST}:${process.env.API_PORT}/${process.env.API_TORRENT_PATH}`;
+//const URL = `${process.env.HOST}:${process.env.PORT}/${process.env.API}`;
 const URL = 'http://localhost:3000';
 
 const schema = {
-    query: 'free',
-    category: 'all',
-    limit: 25,
+    query: '',
+    category: '',
+    limit: 3,
 };
 
 const getUrlParams = (form) => {
@@ -82,10 +90,12 @@ const getUrlParams = (form) => {
 
 const requestMagnets = async (url, opts) => {
     const response = await fetch(url, opts);
+    const result = await response.json();
 
-    return await response.json();
+    return JSON.stringify(result);
 };
 
+// computed: { log() { return console.log(`computed: ${URL}`); } },
 export default {
     name: 'SearchForm',
     data: () => ({
@@ -94,37 +104,35 @@ export default {
         showForm: true,
         error: '',
     }),
-    // computed: { log() { return console.log(`computed: ${URL}`); } },
     mounted() {
-        const urlParams = getUrlParams(event.target);
-
-        console.log('urlParams: ', JSON.stringify(urlParams));
-
         const headers = { 'content-type': 'application/json' };
+
         const magnets = requestMagnets(`${URL}/get`, {
-            headers,
             method: 'GET',
-            query: JSON.stringify(urlParams),
+            headers,
+            query: getUrlParams(event.target),
         });
 
-        console.log('magnets: ', JSON.stringify(magnets));
+        console.log('magnets: ', magnets);
 
         this.fetchedData.push(magnets);
     },
     methods: {
         onSubmit: async (event) => {
-            event.preventDefault();
-
             this.formData = new FormData(event.target);
 
-            const headers = { 'content-type': 'application/x-www-form-urlencoded' };
+            const headers = {
+                'content-type': 'application/x-www-form-urlencoded',
+            };
+
             const magnets = requestMagnets(`${URL}/post`, {
                 headers,
                 method: 'POST',
+                params: this.formData,
                 body: this.formData,
             });
 
-            console.log('magnets: ', JSON.stringify(magnets));
+            console.log('magnets: ', magnets);
 
             this.fetchedData.push(magnets);
         },

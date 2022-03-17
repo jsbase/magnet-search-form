@@ -11,6 +11,8 @@ const { join } = require('path'),
     serve = require('serve-static')(dir),
     TorrentSearchApi = require('torrent-search-api');
 
+const dev = process.env.NODE_ENV === 'development';
+
 const PORT = process.env.PORT || 3000;
 
 const STATUS = {
@@ -18,7 +20,11 @@ const STATUS = {
    empty: 400,
    fail: 404,
 };
-    
+
+const WARNING = {
+    empty: 'Search query must not be empty!',
+};
+
 /*
 // https options
 const options = {
@@ -46,79 +52,83 @@ const getMagnets = async (req, res) => {
     category = category || 'apps';
     limit = limit || '3';
 
-    console.log(`\n\n query:  ${query}`);
+    console.log(`\n\n GET \n query:  ${query}`);
     console.log(` category:  ${category}`);
     console.log(` limit:  ${limit}\n\n`);
 
     const result = await TorrentSearchApi.search(query, category, limit);
-    //filtered = Array.from(results).filter((x) => parseInt(x?.peers) >= 1 && parseInt(x?.seeds) >= 1);
+    filtered = Array.from(results).filter(
+        x => parseInt(x?.peers) >= 1 && parseInt(x?.seeds) >= 1
+    );
 
-    // send(STATUS.success, JSON.stringify(result));
+    // send(STATUS.success, JSON.stringify(filtered));
 
     res.writeHead(STATUS.success, {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json;charset=UTF-8',
     });
 
-    res.end(JSON.stringify(result));
+    res.end(JSON.stringify(filtered));
 };
 
-const postMagnets = async (req, res) => {
-    if (!req.body || !req.body.query) {
-        const msg = {
-            message: "Content can not be empty!",
-        };
-
+const postMagnets = async (req, res, next) => {
+    if (!req.query || !Object.keys(req.query).length) {
         //send(msg, STATUS.empty);
 
         res.writeHead(STATUS.empty, {
-            'Content-Type': 'application/json',
+            'Content-Type': 'text/plain;charset=UTF-8',
         });
 
-        res.end(JSON.stringify(msg));
+        res.end(WARNING.empty);
     } else {
         let {
             query,
             category,
     	    limit,
-        } = req.body;
+        } = req.query;
 
-        query = query || 'manjaro';
+        query = query || 'gimp';
         category = category || 'apps';
         limit = limit || '3';
 
-        console.log(`\n\n query:  ${query}`);
+        console.log(`\n\n POST \n query:  ${query}`);
         console.log(` category:  ${category}`);
         console.log(` limit:  ${limit}\n\n`);
 
-        const result = (
-            await TorrentSearchApi.search(query, limit)
+        const result = await TorrentSearchApi.search(query, limit);
+
+        filtered = Array.from(result).filter(
+            x => parseInt(x?.peers) >= 1 && parseInt(x?.seeds) >= 1
         );
 
-        //filtered = Array.from(results).filter((x) => parseInt(x?.peers) >= 1 && parseInt(x?.seeds) >= 1);
-
         res.writeHead(STATUS.success, {
-            'Content-Type': 'application/json',
+            // 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+            'Content-Type': 'application/json;charset=UTF-8',
         });
 
-        res.end(JSON.stringify(result));
+        res.end(JSON.stringify(filtered));
     }
 };
 
-/* const { handler } = */server()
-    .use(morgan('tiny'))
+// const { handler } =
+server()
+    .use(morgan(
+        dev ? 'dev' : 'short',
+        { immediate: !!dev }
+    ))
     .use(cors())
     .use(cookieParser())
     .use(json())
-    .get('/magnets', getMagnets)
     .post('/magnets', postMagnets)
-    .use(serve).listen(PORT, err => {
-        if (err) { throw err; }
-        console.log(`Server running on localhost:${PORT}`);
+    .get('/magnets', getMagnets)
+    .use(serve)
+    .listen(PORT, err => {
+        if (err) { console.error(err); }
+        else { console.log(`Server running on localhost:${PORT}`); }
     });
 
 /*
 createServer(options, handler).listen(PORT, (err) => {
 	if (err) { throw err; }
-	console.log(`Server running on localhost:${PORT}`);
+	else { console.log(`Server running on localhost:${PORT}`); }
 });
 */

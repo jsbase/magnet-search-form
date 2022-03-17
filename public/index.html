@@ -19,7 +19,11 @@
         <div id="layout">
             <h1>the torrent search engine</h1>
 
-            <form method="GET" action="/magnets" class="pure-form pure-form-stacked">
+            <form class="pure-form pure-form-stacked"
+                action="/magnets"
+                method="POST"
+                enctype="multipart/form-data"
+            >
                 <fieldset>
                     <div class="pure-control-group">
                         <label for="query">What are you searing for?</label>

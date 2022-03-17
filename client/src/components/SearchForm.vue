@@ -2,12 +2,7 @@
     <section>
         <h1>magnet search</h1>
 
-        <form
-            class="mb-3"
-            method="POST"
-            action="/magnets"
-            @submit.prevent="onSubmit"
-        >
+        <form class="mb-3" @submit.prevent="onSubmit">
             <div v-if="error" class="alert alert-dismissible alert-warning">
                 <button type="button" class="close">close</button>
                 <h4 class="alert-heading">Error!</h4>
@@ -70,13 +65,7 @@
 
 <script>
 //const URL = `${process.env.HOST}:${process.env.PORT}/${process.env.API}`;
-const URL = 'http://localhost:3000';
-
-const schema = {
-    query: '',
-    category: '',
-    limit: 3,
-};
+const URL = 'http://localhost:3000/magnets';
 
 const getUrlParams = (form) => {
     const urlParams = new URLSearchParams();
@@ -99,17 +88,24 @@ const requestMagnets = async (url, opts) => {
 export default {
     name: 'SearchForm',
     data: () => ({
+        schema: {
+            query: '',
+            category: '',
+            limit: 3,
+        },
         fetchedData: [],
-        formData: schema,
+        formData: this.schema,
         showForm: true,
         error: '',
     }),
     mounted() {
-        const headers = { 'content-type': 'application/json' };
+        //const headers = {
+        //    'Content-Type': 'application/json',
+        //};
 
         const magnets = requestMagnets(`${URL}/get`, {
-            method: 'GET',
-            headers,
+            //headers,
+            //method: 'GET',
             query: getUrlParams(event.target),
         });
 

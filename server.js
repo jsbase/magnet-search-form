@@ -48,7 +48,7 @@ const getMagnets = async (req, res) => {
         limit,
     } = req.query;
 
-    query = query || 'manjaro';
+    query = query || 'gimp';
     category = category || 'apps';
     limit = limit || '3';
 
@@ -57,7 +57,7 @@ const getMagnets = async (req, res) => {
     console.log(` limit:  ${limit}\n\n`);
 
     const result = await TorrentSearchApi.search(query, category, limit);
-    filtered = Array.from(results).filter(
+    filtered = Array.from(result).filter(
         x => parseInt(x?.peers) >= 1 && parseInt(x?.seeds) >= 1
     );
 
@@ -71,7 +71,9 @@ const getMagnets = async (req, res) => {
 };
 
 const postMagnets = async (req, res, next) => {
-    if (!req.query || !Object.keys(req.query).length) {
+    console.log(`\n\n`, req, `\n`);
+
+    if (!req.query) {
         //send(msg, STATUS.empty);
 
         res.writeHead(STATUS.empty, {

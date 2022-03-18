@@ -1,23 +1,35 @@
-(async () => {
-	const images = [
+export default async (selector, list) => {
+	// fallback
+    const imageList = [
 		'uOi3lg8fGl4',
 		'uSFOwYo1qEw',
 		'tZaA8VqJG3g',
-		'78A265wPiO4',
-		'TAhsXhWipwg',
-		'dQBZY7yEVpc'
-	];
+		'78A265wPiO4'
+    ];
+    // [
+    //    'TAhsXhWipwg',
+    //    'dQBZY7yEVpc',
+    //    'photo - 1517059224940 - d4af9eec41b7'
+    // ]
 
-	const index = Math.floor(Math.random() * 5);
-	const imageUrl = `https://source.unsplash.com/${images[index]}`;
+    imageList.concat(list);
 
-	const rawImage = new Image();
-	rawImage.src = imageUrl;
+	const randomIdx = Math.floor(Math.random() * 5);
+    const rawImage = new Image();
+    rawImage.src = `https://source.unsplash.com/${imageList[randomIdx]}`;
 	await rawImage.decode();
 
-	const background = document.createElement('img');
-	background.src = imageUrl;
+    const img = document.createElement('img');
+    img.src = rawImage.src;
 
-	const poster = document.getElementById('poster');
-	poster.appendChild(background);
-  })();
+    if (selector) {
+        const frame = document.getElementById(selector)
+            || document.getElementsByClassName(selector).item(0);
+
+        if (frame) {
+            frame.appendChild(img)
+        }
+    }
+
+    return img;
+};

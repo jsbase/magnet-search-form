@@ -3,7 +3,7 @@ const { join } = require('path'),
     //{ readFileSync } = require('fs'),
     server = require('polka'),
     //send = require('@polka/send'),
-    cors = require('cors'),
+    //cors = require('cors'),
     morgan = require('morgan'),
     cookieParser = require('cookie-parser'),
     { json } = require('body-parser'),
@@ -12,18 +12,10 @@ const { join } = require('path'),
     TorrentSearchApi = require('torrent-search-api');
 
 const dev = process.env.NODE_ENV === 'development';
-
 const PORT = process.env.PORT || 3000;
-
-const STATUS = {
-   success: 200,
-   empty: 400,
-   fail: 404,
-};
-
-const WARNING = {
-    empty: 'Search query must not be empty!',
-};
+const API = `${process.env.API}`;
+const STATUS = { success: 200, empty: 400, fail: 404 };
+const WARNING = { empty: 'Search query must not be empty!' };
 
 /*
 // https options
@@ -33,8 +25,8 @@ const options = {
 };
 
 // dynamic request
-const load = async (type) => {
-    const result = await fetch(`${URL}/${type}`);
+const load = async () => {
+    const result = await fetch(API);
     return (await result.json());
 };
 */
@@ -57,11 +49,11 @@ const getMagnets = async (req, res) => {
     console.log(` limit:  ${limit}\n\n`);
 
     const result = await TorrentSearchApi.search(query, category, limit);
-    filtered = Array.from(result).filter(
+    const filtered = Array.from(result).filter(
         x => parseInt(x?.peers) >= 1 && parseInt(x?.seeds) >= 1
     );
 
-    // send(STATUS.success, JSON.stringify(filtered));
+    // send(JSON.stringify(filtered), STATUS.success);
 
     res.writeHead(STATUS.success, {
         'Content-Type': 'application/json;charset=UTF-8',
@@ -71,13 +63,13 @@ const getMagnets = async (req, res) => {
 };
 
 const postMagnets = async (req, res, next) => {
-    console.log(`\n\n`, req, `\n`);
+    console.log(`\n\n`, req.query, `\n`);
 
     if (!req.query) {
-        //send(msg, STATUS.empty);
+        // send(WARNING.empty, STATUS.empty);
 
         res.writeHead(STATUS.empty, {
-            'Content-Type': 'text/plain;charset=UTF-8',
+            'Content-Type': 'text/plain',
         });
 
         res.end(WARNING.empty);
@@ -97,14 +89,12 @@ const postMagnets = async (req, res, next) => {
         console.log(` limit:  ${limit}\n\n`);
 
         const result = await TorrentSearchApi.search(query, limit);
-
-        filtered = Array.from(result).filter(
+        const filtered = Array.from(result).filter(
             x => parseInt(x?.peers) >= 1 && parseInt(x?.seeds) >= 1
         );
 
         res.writeHead(STATUS.success, {
-            // 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-            'Content-Type': 'application/json;charset=UTF-8',
+            'Content-Type': 'application/json',
         });
 
         res.end(JSON.stringify(filtered));
@@ -117,11 +107,23 @@ server()
         dev ? 'dev' : 'short',
         { immediate: !!dev }
     ))
-    .use(cors())
-    .use(cookieParser())
+    //.use(cors())
+    //.post(API, postMagnets)
     .use(json())
-    .post('/magnets', postMagnets)
-    .get('/magnets', getMagnets)
+    .post(API, (req, res) => {
+        console.log(`\n\n`, req.query, `\n`);
+
+        res.writeHead(STATUS.success, {
+            'Content-Type': 'application/json',
+        });
+
+    	let json = JSON.stringify(req.body);
+
+    	res.end(json);
+    })
+    .use(json())
+    .get(API, getMagnets)
+    .use(cookieParser())
     .use(serve)
     .listen(PORT, err => {
         if (err) { console.error(err); }

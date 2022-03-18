@@ -24,7 +24,20 @@
     "update": "^0.7.4"
   },
   "devDependencies": {
+    "@babel/eslint-parser": "^7.17.0",
+    "babel": "^6.23.0",
+    "cross-env": "^7.0.3",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-promise": "^5.2.0",
     "polka": "^0.5.2",
+    "prettier": "^2.6.0",
+    "prettier-eslint": "^13.0.0",
+    "prettier-eslint-cli": "^5.0.1",
     "serve-static": "^1.14.2"
   }
 }

@@ -1,21 +1,24 @@
-const { join } = require('path'),
-    //{ createServer } = require('https'),
-    //{ readFileSync } = require('fs'),
-    server = require('polka'),
-    //send = require('@polka/send'),
-    //cors = require('cors'),
-    morgan = require('morgan'),
-    cookieParser = require('cookie-parser'),
-    { json } = require('body-parser'),
-    dir = join(__dirname, 'public'),
-    serve = require('serve-static')(dir),
-    TorrentSearchApi = require('torrent-search-api');
+const { join } = require('path')
+// { createServer } = require('https'),
+// { readFileSync } = require('fs'),
+const server = require('polka')
+// send = require('@polka/send'),
+const cors = require('cors')
+const morgan = require('morgan')
+const cookieParser = require('cookie-parser')
+const { json } = require('body-parser')
+const dir = join(__dirname, 'public')
+const serve = require('serve-static')(dir)
+const TorrentSearchApi = require('torrent-search-api')
 
-const dev = process.env.NODE_ENV === 'development';
-const PORT = process.env.PORT || 3000;
-const API = `${process.env.API}`;
-const STATUS = { success: 200, empty: 400, fail: 404 };
-const WARNING = { empty: 'Search query must not be empty!' };
+const { API, HOST, PORT, NODE_ENV } = process.env
+const isDev = NODE_ENV === 'development'
+const STATUS = { success: 200, empty: 400, fail: 404 }
+const WARNING = { empty: 'Search query must not be empty!' }
+const HEADER = {
+  json: { 'Content-Type': 'application/json' },
+  text: { 'Content-Type': 'text/plain' }
+}
 
 /*
 // https options
@@ -31,108 +34,77 @@ const load = async () => {
 };
 */
 
-TorrentSearchApi.enablePublicProviders();
+TorrentSearchApi.enablePublicProviders()
 
 const getMagnets = async (req, res) => {
-    let {
-        query,
-        category,
-        limit,
-    } = req.query;
+  let { query, category, limit } = req.query
 
-    query = query || 'gimp';
-    category = category || 'apps';
-    limit = limit || '3';
+  query = query || 'all'
+  category = category || 'apps'
+  limit = limit || '3'
 
-    console.log(`\n\n GET \n query:  ${query}`);
-    console.log(` category:  ${category}`);
-    console.log(` limit:  ${limit}\n\n`);
+  console.log(`\n\n GET \n query:  ${query}`)
+  console.log(` category:  ${category}`)
+  console.log(` limit:  ${limit}\n\n`)
 
-    const result = await TorrentSearchApi.search(query, category, limit);
-    const filtered = Array.from(result).filter(
-        x => parseInt(x?.peers) >= 1 && parseInt(x?.seeds) >= 1
-    );
+  const result = (await TorrentSearchApi.search(query, category, limit))
 
-    // send(JSON.stringify(filtered), STATUS.success);
+  // const filtered = Array.from(result).filter(
+  //    x => parseInt(x?.peers) >= 1 && parseInt(x?.seeds) >= 1
+  // );
+  // send(JSON.stringify(filtered), STATUS.success);
 
-    res.writeHead(STATUS.success, {
-        'Content-Type': 'application/json;charset=UTF-8',
-    });
+  res.writeHead(STATUS.success, HEADER.json)
+  res.end(JSON.stringify(result))
+}
 
-    res.end(JSON.stringify(filtered));
-};
+const postMagnets = async (req, res) => {
+  console.log('\n\n', req)
 
-const postMagnets = async (req, res, next) => {
-    console.log(`\n\n`, req.query, `\n`);
+  if (!req.query) {
+    // send(WARNING.empty, STATUS.empty);
+    res.writeHead(STATUS.empty, HEADER.text)
+    res.end(WARNING.empty)
+  } else {
+    let { query, category, limit } = req.query
 
-    if (!req.query) {
-        // send(WARNING.empty, STATUS.empty);
+    query = query || 'all'
+    category = category || 'apps'
+    limit = limit || '3'
 
-        res.writeHead(STATUS.empty, {
-            'Content-Type': 'text/plain',
-        });
+    console.log(`\n\n POST \n query:  ${query}`)
+    console.log(` category:  ${category}`)
+    console.log(` limit:  ${limit}\n\n`)
 
-        res.end(WARNING.empty);
-    } else {
-        let {
-            query,
-            category,
-    	    limit,
-        } = req.query;
+    const result = (await TorrentSearchApi.search(query, limit))
 
-        query = query || 'gimp';
-        category = category || 'apps';
-        limit = limit || '3';
+    // const filtered = Array.from(result).filter(
+    //    x => parseInt(x?.peers) >= 1 && parseInt(x?.seeds) >= 1
+    // );
 
-        console.log(`\n\n POST \n query:  ${query}`);
-        console.log(` category:  ${category}`);
-        console.log(` limit:  ${limit}\n\n`);
-
-        const result = await TorrentSearchApi.search(query, limit);
-        const filtered = Array.from(result).filter(
-            x => parseInt(x?.peers) >= 1 && parseInt(x?.seeds) >= 1
-        );
-
-        res.writeHead(STATUS.success, {
-            'Content-Type': 'application/json',
-        });
-
-        res.end(JSON.stringify(filtered));
-    }
-};
+    res.writeHead(STATUS.success, HEADER.json)
+    res.end(JSON.stringify(result))
+  }
+}
 
 // const { handler } =
 server()
-    .use(morgan(
-        dev ? 'dev' : 'short',
-        { immediate: !!dev }
-    ))
-    //.use(cors())
-    //.post(API, postMagnets)
-    .use(json())
-    .post(API, (req, res) => {
-        console.log(`\n\n`, req.query, `\n`);
-
-        res.writeHead(STATUS.success, {
-            'Content-Type': 'application/json',
-        });
-
-    	let json = JSON.stringify(req.body);
-
-    	res.end(json);
-    })
-    .use(json())
-    .get(API, getMagnets)
-    .use(cookieParser())
-    .use(serve)
-    .listen(PORT, err => {
-        if (err) { console.error(err); }
-        else { console.log(`Server running on localhost:${PORT}`); }
-    });
+  .use(morgan(isDev ? 'dev' : 'tiny', { immediate: isDev }))
+  .use(cors())
+  .use(cookieParser())
+  .use(json())
+  .get('/magnets', getMagnets)
+  .post('/magnets', postMagnets)
+  .use(serve)
+  .listen(PORT || 5000, () => {
+    if (isDev) {
+      console.log(`API is now running on ${HOST}:${PORT}${API}`)
+    }
+  })
 
 /*
 createServer(options, handler).listen(PORT, (err) => {
-	if (err) { throw err; }
-	else { console.log(`Server running on localhost:${PORT}`); }
+  if (err) { throw err; }
+  else { console.log(`Server running on localhost:${PORT}`); }
 });
 */

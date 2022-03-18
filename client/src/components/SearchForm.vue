@@ -2,7 +2,7 @@
     <section>
         <h1>magnet search</h1>
 
-        <form class="mb-3" @submit.prevent="onSubmit">
+        <form v-if="showForm" class="mb-3" @submit.prevent="onSubmit">
             <div v-if="error" class="alert alert-dismissible alert-warning">
                 <button type="button" class="close">close</button>
                 <h4 class="alert-heading">Error!</h4>
@@ -41,7 +41,7 @@
             </div>
             <button type="submit" class="btn btn-primary">Search</button>
         </form>
-        <ul v-for="magnet in fetchedData" :key="magnet.title">
+        <ul v-for="magnet in fetchedData" :key="magnet.query">
             <li>
                 <h4 v-if="magnet.title" class="mt-0 mb-1">
                     {{ magnet.title }}
@@ -65,8 +65,9 @@
 
 <script>
 //const URL = `${process.env.HOST}:${process.env.PORT}/${process.env.API}`;
-const URL = 'http://localhost:3000/magnets';
+const URL = '/magnets';
 
+/*
 const getUrlParams = (form) => {
     const urlParams = new URLSearchParams();
 
@@ -76,6 +77,7 @@ const getUrlParams = (form) => {
 
     return JSON.stringify(urlParams);
 };
+*/
 
 const requestMagnets = async (url, opts) => {
     const response = await fetch(url, opts);
@@ -88,16 +90,15 @@ const requestMagnets = async (url, opts) => {
 export default {
     name: 'SearchForm',
     data: () => ({
-        schema: {
-            query: '',
-            category: '',
+        formData: {
+            query: 'all',
+            category: 'apps',
             limit: 3,
         },
         fetchedData: [],
-        formData: this.schema,
         showForm: true,
-        error: '',
     }),
+    /*
     mounted() {
         //const headers = {
         //    'Content-Type': 'application/json',
@@ -113,24 +114,26 @@ export default {
 
         this.fetchedData.push(magnets);
     },
+    */
     methods: {
-        onSubmit: async (event) => {
+        onSubmit: (event) => {
             this.formData = new FormData(event.target);
 
-            const headers = {
-                'content-type': 'application/x-www-form-urlencoded',
-            };
+            //const headers = {
+            //'Content-Type': 'application/json',
+            //'Content-Type': 'application/x-www-form-urlencoded',
+            //};
 
             const magnets = requestMagnets(`${URL}/post`, {
-                headers,
                 method: 'POST',
-                params: this.formData,
                 body: this.formData,
+                //headers,
             });
 
             console.log('magnets: ', magnets);
 
             this.fetchedData.push(magnets);
+            this.showForm = false;
         },
     },
 };

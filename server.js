@@ -2,7 +2,7 @@ const { join } = require('path')
 // { createServer } = require('https'),
 // { readFileSync } = require('fs'),
 const server = require('polka')
-// send = require('@polka/send'),
+const send = require('@polka/send')
 const cors = require('cors')
 const morgan = require('morgan')
 const cookieParser = require('cookie-parser')
@@ -47,15 +47,15 @@ const getMagnets = async (req, res) => {
   console.log(` category:  ${category}`)
   console.log(` limit:  ${limit}\n\n`)
 
-  const result = (await TorrentSearchApi.search(query, category, limit))
+  const result = await TorrentSearchApi.search(query, category, limit)
 
   // const filtered = Array.from(result).filter(
   //    x => parseInt(x?.peers) >= 1 && parseInt(x?.seeds) >= 1
   // );
   // send(JSON.stringify(filtered), STATUS.success);
-
-  res.writeHead(STATUS.success, HEADER.json)
-  res.end(JSON.stringify(result))
+  send(res, STATUS.success, JSON.stringify(result), HEADER.json)
+  //res.writeHead(STATUS.success, HEADER.json)
+  res.end(/*JSON.stringify(result)*/)
 }
 
 const postMagnets = async (req, res) => {

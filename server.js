@@ -16,8 +16,9 @@ const isDev = NODE_ENV === 'development'
 const STATUS = { success: 200, empty: 400, fail: 404 }
 const WARNING = { empty: 'Search query must not be empty!' }
 const HEADER = {
-  json: { 'Content-Type': 'application/json' },
-  text: { 'Content-Type': 'text/plain' }
+  json: { 'content-type': 'application/json; charset=UTF-8' },
+  text: { 'content-type': 'text/plain; charset=UTF-8' },
+  urlencoded: { 'content-type': 'application/x-www-form-urlencoded; charset=UTF8' }
 }
 
 /*
@@ -49,13 +50,18 @@ const getMagnets = async (req, res) => {
 
   const result = await TorrentSearchApi.search(query, category, limit)
 
+  send(
+    res,
+    STATUS.success,
+    JSON.stringify(result)
+  )
+
   // const filtered = Array.from(result).filter(
   //    x => parseInt(x?.peers) >= 1 && parseInt(x?.seeds) >= 1
   // );
   // send(JSON.stringify(filtered), STATUS.success);
-  send(res, STATUS.success, JSON.stringify(result), HEADER.json)
-  //res.writeHead(STATUS.success, HEADER.json)
-  res.end(/*JSON.stringify(result)*/)
+  // res.writeHead(STATUS.success, HEADER.json)
+  // res.end(/* JSON.stringify(result) */)
 }
 
 const postMagnets = async (req, res) => {

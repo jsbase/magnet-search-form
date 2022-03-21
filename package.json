@@ -2,16 +2,18 @@
   "name": "magnet-search-form",
   "version": "0.0.2",
   "description": "Search p2p files like magnets or torrents.",
-  "main": "server.js",
+  "main": "simple-server.js",
+  "type": "module",
   "scripts": {
-    "start": "concurrently \"node server.js\" \"cd client && npm run serve\"",
+    "start:backend": "node simple-server.js",
+    "stsrt:frontend": "cd client/ && npm run serve",
+    "start": "concurrently \"npm run start:backend\" \"npm run frontend\"",
     "create-ssl-cert": "openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./ssl/magnet-search-form.key -out ./ssl/magnet-search-form.crt"
   },
   "dependencies": {
     "@polka/send": "^0.4.0",
     "@polka/send-type": "^0.5.2",
     "@polka/url": "^0.5.0",
-    "@vue/cli": "^5.0.1",
     "body-parser": "^1.19.2",
     "concurrently": "^7.0.0",
     "cookie-parser": "^1.4.6",
@@ -20,8 +22,7 @@
     "path": "^0.12.7",
     "require": "^2.4.20",
     "resolve": "^1.20.0",
-    "torrent-search-api": "^2.1.3",
-    "update": "^0.7.4"
+    "torrent-search-api": "^2.1.3"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.17.0",
@@ -38,6 +39,7 @@
     "prettier": "^2.6.0",
     "prettier-eslint": "^13.0.0",
     "prettier-eslint-cli": "^5.0.1",
-    "serve-static": "^1.14.2"
+    "serve-static": "^1.14.2",
+    "sirv": "^2.0.2"
   }
 }

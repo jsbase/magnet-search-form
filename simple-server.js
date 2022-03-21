@@ -1,4 +1,4 @@
-// const fetch = require('node-fetch');
+const fetch = require('./node-fetch-mod');
 const server = require('polka');
 const send = require('@polka/send-type');
 const morgan = require('morgan');
@@ -18,12 +18,14 @@ server()
 	.post('/magnets', async (req, res) => {
         try {
             console.log(JSON.stringify(req.query));
-            // const data = await fetch(`${API}/users`);
-            const data = {
-                json: async () => (Promise.resolve({ "one": "two" }))
-            };
+
+            const data = await fetch(`${API}/users`);
+            // const data = {
+            //    json: async () => (Promise.resolve({ "one": "two" }))
+            // };
             const result = await data.json();
-            send(res, 200, data);
+
+            send(res, 200, result);
         } catch(err) {
             send(res, 404);
         }

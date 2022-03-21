@@ -106,4 +106,4 @@ dist
 .tern-port
 
 # SSL
-ssl/
+ssl/*

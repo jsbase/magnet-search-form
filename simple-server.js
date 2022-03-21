@@ -40,5 +40,3 @@ server()
 	.listen(PORT, () => {
 		console.log(`> Running on localhost:${PORT}`);
 	});
-
-module.exports = server;

@@ -1,5 +1,5 @@
-const fetch = require('node-fetch');
-const polka = require('polka');
+// const fetch = require('node-fetch');
+const server = require('polka');
 const send = require('@polka/send-type');
 const morgan = require('morgan');
 const cors = require('cors');
@@ -10,15 +10,18 @@ const sirv = require('sirv');
 const { PORT = 3000 } = process.env;
 const API = 'https://api.github.com';
 
-polka()
+server()
     .use(cors())
     .use(morgan('combined'))
 	.use(sirv('public'))
 	.use(parser.json())
 	.post('/magnets', async (req, res) => {
-        console.log(JSON.stringify(req.query));
         try {
-            const data = await fetch(`${API}/users`);
+            console.log(JSON.stringify(req.query));
+            // const data = await fetch(`${API}/users`);
+            const data = {
+                json: async () => (Promise.resolve({ "one": "two" }))
+            };
             const result = await data.json();
             send(res, 200, data);
         } catch(err) {
@@ -35,3 +38,5 @@ polka()
 	.listen(PORT, () => {
 		console.log(`> Running on localhost:${PORT}`);
 	});
+
+module.exports = server;

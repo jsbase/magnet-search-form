@@ -2,7 +2,11 @@
     <section>
         <h1>magnet search</h1>
 
-        <form class="mb-3" @submit.prevent="onSubmit">
+        <form
+            class="mb-3"
+            @submit.prevent="onSubmit"
+            enctype="application/x-www-form-urlencoded"
+        >
             <div v-if="error" class="alert alert-dismissible alert-warning">
                 <button type="button" class="close">close</button>
                 <h4 class="alert-heading">Error!</h4>
@@ -13,6 +17,7 @@
                 <input
                     v-model="fetchedData.query"
                     id="query"
+                    name="query"
                     class="form-control"
                     type="text"
                     placeholder="What are you looking for?"
@@ -22,6 +27,7 @@
             <div class="form-group">
                 <label for="category">Category</label>
                 <input
+                    name="category"
                     v-model="fetchedData.category"
                     id="category"
                     class="form-control"
@@ -32,6 +38,7 @@
             <div class="form-group">
                 <label for="limit">Limit</label>
                 <input
+                    name="limit"
                     v-model="fetchedData.limit"
                     id="limit"
                     class="form-control"
@@ -41,7 +48,7 @@
             </div>
             <button type="submit" class="btn btn-primary">Search</button>
         </form>
-        <ul v-for="magnet in fetchedData" :key="magnet.title">
+        <ul v-for="magnet in fetchedData" :key="magnet.query">
             <li>
                 <h4 v-if="magnet.title" class="mt-0 mb-1">
                     {{ magnet.title }}
@@ -64,9 +71,20 @@
 </template>
 
 <script>
-//const URL = `${process.env.HOST}:${process.env.PORT}/${process.env.API}`;
-const URL = 'http://localhost:3000/magnets';
+//const URL = `${process.env.HOST}:${process.env.PORT}/${process.env.API}`
+const URL = '/magnets';
 
+/*
+const HEADER = {
+    json: { 'content-type': 'application/json; charset=UTF8' },
+    text: { 'content-type': 'text/plain; charset=UTF8' },
+    urlencoded: {
+        'content-type': 'application/x-www-form-urlencoded; charset=UTF8',
+    },
+};
+*/
+
+/*
 const getUrlParams = (form) => {
     const urlParams = new URLSearchParams();
 
@@ -76,6 +94,7 @@ const getUrlParams = (form) => {
 
     return JSON.stringify(urlParams);
 };
+*/
 
 const requestMagnets = async (url, opts) => {
     const response = await fetch(url, opts);
@@ -84,53 +103,51 @@ const requestMagnets = async (url, opts) => {
     return JSON.stringify(result);
 };
 
-// computed: { log() { return console.log(`computed: ${URL}`); } },
 export default {
     name: 'SearchForm',
     data: () => ({
-        schema: {
-            query: '',
-            category: '',
+        formData: {
+            query: 'all',
+            category: 'apps',
             limit: 3,
         },
         fetchedData: [],
-        formData: this.schema,
-        showForm: true,
-        error: '',
+        // showForm: true
     }),
+    computed: {
+        log() {
+            return console.log(`(on computed) URL: ${URL}`);
+        },
+    },
     mounted() {
-        //const headers = {
-        //    'Content-Type': 'application/json',
-        //};
+        alert(`(on mounted) this: ${URL}`);
 
-        const magnets = requestMagnets(`${URL}/get`, {
-            //headers,
-            //method: 'GET',
-            query: getUrlParams(event.target),
+        /*
+        const magnets = requestMagnets(`/magnets`, {
+            query: getUrlParams(event.target)
         });
 
         console.log('magnets: ', magnets);
 
         this.fetchedData.push(magnets);
+        */
     },
     methods: {
-        onSubmit: async (event) => {
+        onSubmit: (event) => {
             this.formData = new FormData(event.target);
 
-            const headers = {
-                'content-type': 'application/x-www-form-urlencoded',
-            };
-
-            const magnets = requestMagnets(`${URL}/post`, {
-                headers,
+            const magnets = requestMagnets(URL, {
+                headers: {
+                    'content-type': 'application/json; charset=UTF8',
+                },
                 method: 'POST',
-                params: this.formData,
                 body: this.formData,
             });
 
             console.log('magnets: ', magnets);
 
             this.fetchedData.push(magnets);
+            // this.showForm = false
         },
     },
 };
@@ -147,10 +164,32 @@ h1 {
 ul {
     list-style-type: none;
     list-style-position: outside;
+    margin: 1rem auto;
+    width: 80%;
 }
 
 li {
     margin-top: 1rem;
     border: 1px solid #d1d1d1;
+}
+
+.btn {
+    padding: 8px 12px;
+    font-weight: 700;
+}
+
+.btn-primary {
+    background-color: tomato;
+    border: 1px solid red;
+    border-radius: 5px;
+    color: #fff;
+    text-align: center;
+    width: 80%;
+
+    &:active,
+    &:focus,
+    &:hover {
+        background-color: red;
+    }
 }
 </style>

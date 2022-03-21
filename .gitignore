@@ -49,6 +49,7 @@ typings/
 
 # Optional npm cache directory
 .npm
+*.bak
 
 # Optional eslint cache
 .eslintcache
@@ -71,9 +72,11 @@ typings/
 # dotenv environment variables file
 .env
 .env.test
+.env.local
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
+.tmp
 
 # Next.js build output
 .next
@@ -104,4 +107,4 @@ dist
 .tern-port
 
 # SSL
-ssl/
+ssl/*

@@ -1,0 +1,11 @@
+{
+    "env": { "node": true },
+    "extends": ["standard"],
+    "parserOptions": {
+        "ecmaVersion": "latest",
+        "sourceType": "module"
+    },
+    "rules": {
+        "semi": ["error", "never"]
+    }
+}

@@ -18,13 +18,15 @@ server()
     .use(parser.json())
     .post('/magnets', async (req, res) => {
         try {
-            // console.log(' \n query: ', JSON.stringify(req.query), ' \n ');
+            console.log(' \n query: ', JSON.stringify(req.query), ' \n ');
 
-            let { query, category, limit } = req.query;
+            const query = JSON.stringify(req.query.query) || '';
+            const category = JSON.stringify(req.query.category) || 'all';
+            const limit = parseInt(JSON.stringify(req.query.limit), 10) || 3;
 
-            query = query || '1080p';
-            category = category || 'Movies';
-            limit = parseInt(limit, 10) || 3;
+            //query = query || '1080p';
+            //category = category || 'Movies';
+            //limit = parseInt(limit, 10) || 3;
 
             console.log(`\n POST \n query:  ${query}`);
             console.log(` category:  ${category}`);

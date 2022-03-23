@@ -7,8 +7,8 @@
   "type": "commonjs",
   "scripts": {
     "start:backend": "node simple-server.js",
-    "stsrt:frontend": "cd client/ && npm run serve",
-    "start": "concurrently \"npm run start:backend\" \"npm run frontend\"",
+    "start:frontend": "cd client/ && yarn run serve",
+    "start": "concurrently \"yarn run start:backend\" \"yarn run start:frontend\"",
     "create-ssl-cert": "openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./ssl/magnet-search-form.key -out ./ssl/magnet-search-form.crt"
   },
   "dependencies": {

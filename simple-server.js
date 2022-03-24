@@ -1,7 +1,7 @@
 const server = require('polka');
 const send = require('@polka/send-type');
 const morgan = require('morgan');
-const cors = require('cors');
+// const cors = require('cors');
 const parser = require('body-parser');
 const sirv = require('sirv');
 const TorrentSearchApi = require('torrent-search-api');
@@ -12,7 +12,7 @@ const { PORT = 3000 } = process.env;
 TorrentSearchApi.enablePublicProviders();
 
 server()
-    .use(cors())
+    // .use(cors())
     .use(morgan('combined'))
     .use(sirv('public'))
     .use(parser.json())
@@ -20,9 +20,9 @@ server()
         try {
             console.log(' \n query: ', JSON.stringify(req.query), ' \n ');
 
-            const query = JSON.stringify(req.query.query) || '';
-            const category = JSON.stringify(req.query.category) || 'all';
-            const limit = parseInt(JSON.stringify(req.query.limit), 10) || 3;
+            const query = JSON.stringify(req.query).query || '';
+            const category = JSON.stringify(req.query).category || 'All';
+            const limit = parseInt(JSON.stringify(req.query).limit, 10) || 1;
 
             //query = query || '1080p';
             //category = category || 'Movies';
@@ -37,6 +37,7 @@ server()
                 category,
                 limit
             );
+
             console.log(' \n torrents: ', torrents, ' \n ');
 
             // const getMagnet = async (_torrent) => await TorrentSearchApi.getMagnet(_torrent);

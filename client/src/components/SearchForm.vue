@@ -4,8 +4,8 @@
 
         <form
             class="mb-3"
-            @submit="onSubmit"
             enctype="application/x-www-form-urlencoded; UTF-8"
+            v-on:submit.prevent="onSubmit"
         >
             <!-- enctype="application/x-www-form-urlencoded; UTF-8" -->
             <div v-if="error" class="alert alert-dismissible alert-warning">
@@ -16,9 +16,8 @@
             <div class="form-group">
                 <label for="query">Search</label>
                 <input
-                    v-model="fetchedData.query"
+                    v-model.trim="formValue.query"
                     id="query"
-                    name="query"
                     class="form-control"
                     type="text"
                     placeholder="What are you looking for?"
@@ -28,8 +27,7 @@
             <div class="form-group">
                 <label for="category">Category</label>
                 <input
-                    name="category"
-                    v-model="fetchedData.category"
+                    v-model.trim="formValue.category"
                     id="category"
                     class="form-control"
                     type="text"
@@ -39,17 +37,18 @@
             <div class="form-group">
                 <label for="limit">Limit</label>
                 <input
-                    name="limit"
-                    v-model="fetchedData.limit"
+                    v-model.number="formValue.limit"
                     id="limit"
                     class="form-control"
                     type="number"
                     placeholder="e.g. 10, 50, 100"
                 />
             </div>
-            <button type="submit" class="btn btn-primary">Search</button>
+            <button type="submit" class="pure-button pure-button-primary">
+                Search
+            </button>
         </form>
-        <ul v-for="magnet in fetchedData" :key="magnet.query">
+        <ul v-for="magnet in torrents" v-bind:key="magnet.title">
             <li>
                 <h4 v-if="magnet.title" class="mt-0 mb-1">
                     {{ magnet.title }}
@@ -83,6 +82,7 @@ const HEADER = {
     },
 };
 
+/*
 const getUrlParams = (form) => {
     const urlParams = new URLSearchParams();
 
@@ -92,8 +92,9 @@ const getUrlParams = (form) => {
 
     return JSON.stringify(urlParams);
 };
+*/
 
-const requestMagnets = async (url, opts) => {
+const fetchTorrents = async (url, opts) => {
     const res = await fetch(url, opts);
     const data = await res.json();
 
@@ -102,51 +103,54 @@ const requestMagnets = async (url, opts) => {
 
 export default {
     name: 'SearchForm',
-    data: () => ({
-        formData: {
-            query: '',
-            category: 'All',
-            limit: 2,
-        },
-        fetchedData: [],
-    }),
+    data: () => {
+        return {
+            formValue: {
+                query: '',
+                category: 'All',
+                limit: 2,
+            },
+            torrents: [],
+        };
+    },
     computed: {
         log() {
-            return console.log(`(on computed) URL: ${URL}`);
+            return console.log(
+                `(on computed) fetched torrents from "${URL}": `,
+                this.torrents
+            );
         },
     },
     mounted() {
-        alert(`(on mounted) URL: ${URL}`);
-
         /*
-        const magnets = requestMagnets(`${URL}`, {
+        const magnets = fetchTorrents(`${URL}`, {
             query: getUrlParams(event.target)
         });
 
-        console.log('magnets: ', magnets);
-
-        this.fetchedData.push(magnets);
+        this.torrents.push(magnets);
         */
     },
     methods: {
-        onSubmit: (event) => {
-            this.formData = new FormData(event.target);
+        onSubmit: () => {
+            // this.formValue = new FormData(event.target);
+            // console.log('[onSubmit] target:', event.target);
+            // const { query, category, limit } = this.formValue;
 
-            console.log('[onSubmit] target:', event.target);
-            console.log(
-                '[onSubmit] URL parameter: ',
-                getUrlParams(this.formData)
+            // console.log('query: ', query);
+            // console.log('category: ', category);
+            // console.log('limit: ', limit);
+
+            console.log('this.formValue: ', this.formValue);
+
+            this.torrents.push(
+                fetchTorrents(URL, {
+                    headers: HEADER.encoded,
+                    method: 'POST',
+                    body: this.formValue,
+                })
             );
 
-            const magnets = requestMagnets(URL, {
-                headers: HEADER.encoded,
-                method: 'POST',
-                body: this.formData,
-            });
-
-            console.log('magnets: ', magnets);
-
-            this.fetchedData.push(magnets);
+            console.log('this.torrents: ', this.torrents);
         },
     },
 };
@@ -172,23 +176,21 @@ li {
     border: 1px solid #d1d1d1;
 }
 
-.btn {
-    padding: 8px 12px;
-    font-weight: 700;
-}
-
-.btn-primary {
+.pure-button-primary {
     background-color: tomato;
     border: 1px solid red;
     border-radius: 5px;
     color: #fff;
+    font-weight: 700;
+    padding: 8px 12px;
+    margin-top: 15px auto 0;
     text-align: center;
-    width: 80%;
+    width: 86%;
+}
 
-    &:active,
-    &:focus,
-    &:hover {
-        background-color: red;
-    }
+.pure-button-primary:active,
+.pure-button-primary:focus,
+.pure-button-primary:hover {
+    background-color: red;
 }
 </style>

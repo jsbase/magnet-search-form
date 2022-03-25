@@ -5,14 +5,8 @@
         <form
             class="mb-3"
             enctype="application/x-www-form-urlencoded; UTF-8"
-            v-on:submit.prevent="onSubmit"
+            v-on:submit="onSubmit"
         >
-            <!-- enctype="application/x-www-form-urlencoded; UTF-8" -->
-            <div v-if="error" class="alert alert-dismissible alert-warning">
-                <button type="button" class="close">close</button>
-                <h4 class="alert-heading">Error!</h4>
-                <p v-if="error" class="mb-0">{{ error }}</p>
-            </div>
             <div class="form-group">
                 <label for="query">Search</label>
                 <input
@@ -48,8 +42,9 @@
                 Search
             </button>
         </form>
-        <ul v-for="magnet in torrents" v-bind:key="magnet.title">
-            <li>
+
+        <ul>
+            <li v-for="(magnet, key) in magnets">
                 <h4 v-if="magnet.title" class="mt-0 mb-1">
                     {{ magnet.title }}
                 </h4>
@@ -71,86 +66,76 @@
 </template>
 
 <script>
-// const URL = `${process.env.HOST}:${process.env.PORT}/${process.env.API}`
-const URL = 'http://localhost:3000/magnets';
-
-const HEADER = {
-    json: { 'Content-Type': 'application/json; charset=UTF-8' },
-    text: { 'Content-Type': 'text/plain; charset=UTF-8' },
-    encoded: {
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-    },
-};
-
-/*
-const getUrlParams = (form) => {
-    const urlParams = new URLSearchParams();
-
-    for (const pair of new FormData(form)) {
-        urlParams.append(pair[0], pair[1]);
-    }
-
-    return JSON.stringify(urlParams);
-};
-*/
-
-const fetchTorrents = async (url, opts) => {
-    const res = await fetch(url, opts);
-    const data = await res.json();
-
-    return JSON.stringify(data);
-};
-
 export default {
     name: 'SearchForm',
-    data: () => {
-        return {
-            formValue: {
-                query: '',
-                category: 'All',
-                limit: 2,
+    data: () => ({
+        URL: 'http://localhost:3000/magnets', // `${process.env.HOST}:${process.env.PORT}/${process.env.API}`
+        HEADERS: {
+            json: { 'Content-Type': 'application/json; charset=UTF-8' },
+            text: { 'Content-Type': 'text/plain; charset=UTF-8' },
+            encoded: {
+                'Content-Type':
+                    'application/x-www-form-urlencoded; charset=UTF-8',
             },
-            torrents: [],
-        };
-    },
+        },
+        formValue: {
+            query: '',
+            category: 'All',
+            limit: 2,
+        },
+        magnets: [],
+    }),
     computed: {
         log() {
             return console.log(
-                `(on computed) fetched torrents from "${URL}": `,
-                this.torrents
+                `(on computed) fetched magnets from "${this.URL}": `,
+                this.magnets
             );
         },
     },
     mounted() {
         /*
-        const magnets = fetchTorrents(`${URL}`, {
+        const magnets = this.fetchTorrents(`${this.URL}`, {
             query: getUrlParams(event.target)
         });
 
-        this.torrents.push(magnets);
+        this.magnets.push(magnets);
         */
     },
     methods: {
-        onSubmit: () => {
-            // this.formValue = new FormData(event.target);
-            // console.log('[onSubmit] target:', event.target);
-            // const { query, category, limit } = this.formValue;
+        getUrlParams: (form) => {
+            const urlParams = new URLSearchParams();
 
+            for (const pair of new FormData(form)) {
+                urlParams.append(pair[0], pair[1]);
+            }
+
+            return JSON.stringify(urlParams);
+        },
+        fetchTorrents: async (url, opts) => {
+            const res = await fetch(url, opts);
+            const data = await res.json();
+
+            return JSON.stringify(data);
+        },
+        onSubmit: (event) => {
+            console.log('[onSubmit] formData(event.target):', new FormData(event.target));
+            console.log('this.formValue: ', this.formValue);
+
+            // const { query, category, limit } = this.formValue;
             // console.log('query: ', query);
             // console.log('category: ', category);
             // console.log('limit: ', limit);
 
-            console.log('this.formValue: ', this.formValue);
-
-            this.torrents.push(
-                fetchTorrents(URL, {
-                    headers: HEADER.encoded,
+            this.magnets.push(
+                this.fetchTorrents(this.URL, {
+                    headers: this.HEADERS.encoded,
                     method: 'POST',
                     body: this.formValue,
                 })
             );
 
-            console.log('this.torrents: ', this.torrents);
+            console.log('onSubmit -> this.magnets: ', this.magnets);
         },
     },
 };

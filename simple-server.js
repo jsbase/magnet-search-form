@@ -18,25 +18,20 @@ server()
     .use(parser.json())
     .post('/magnets', async (req, res) => {
         try {
-            console.log(' \n query: ', JSON.stringify(req.query), ' \n ');
+            let {
+                query = '1080p',
+                category = 'All',
+                limit = 1
+            } = req.query;
 
-            const query = JSON.stringify(req.query).query || '';
-            const category = JSON.stringify(req.query).category || 'All';
-            const limit = parseInt(JSON.stringify(req.query).limit, 10) || 1;
+            console.log(`\n 
+                POST \n 
+                query:  ${query} \n 
+                category:  ${category} \n 
+                limit:  ${limit} \n 
+            `);
 
-            //query = query || '1080p';
-            //category = category || 'Movies';
-            //limit = parseInt(limit, 10) || 3;
-
-            console.log(`\n POST \n query:  ${query}`);
-            console.log(` category:  ${category}`);
-            console.log(` limit:  ${limit} \n `);
-
-            const torrents = await TorrentSearchApi.search(
-                query,
-                category,
-                limit
-            );
+            const torrents = await TorrentSearchApi.search(query, category, limit);
 
             console.log(' \n torrents: ', torrents, ' \n ');
 
@@ -50,11 +45,11 @@ server()
         }
 
         /* res.writeHead(200, {
-		   'content-type': 'application/json; charset=UTF-8'
-		});
+           'content-type': 'application/json; charset=UTF-8'
+        });
 
         let json = JSON.stringify(req.query);
-		res.end(json); */
+        res.end(json); */
     })
     .listen(PORT, () => {
         console.log(`> Running on localhost:${PORT}`);

@@ -66,55 +66,59 @@ export default {
         magnets: [],
     }),
     computed: {
-        log() => (console.log(`[computed] magnets: `, this.magnets)),
-},
-mounted() { /*
+        log() {
+            return console.log(`[computed] magnets: `, this.magnets);
+        },
+    },
+    mounted() {
+        /*
         const magnets = this.fetchTorrents(`${this.URL}`, {
             query: getUrlParams(event.target)
         });
 
         this.magnets.push(magnets);
-    */ },
-methods: {
-    getUrlParams: (form) => {
-        const urlParams = new URLSearchParams();
-
-        for (const pair of new FormData(form)) {
-            urlParams.append(pair[0], pair[1]);
-        }
-
-        return JSON.stringify(urlParams);
+        */
     },
+    methods: {
+        getUrlParams: (form) => {
+            const urlParams = new URLSearchParams();
+
+            for (const pair of new FormData(form)) {
+                urlParams.append(pair[0], pair[1]);
+            }
+
+            return JSON.stringify(urlParams);
+        },
         fetchTorrents: async (url, opts) => {
             const res = await fetch(url, opts);
             const data = await res.json();
 
             return JSON.stringify(data);
         },
-            onSubmit: (event) => {
-                console.log(
-                    '[onSubmit] FormData(target): ',
-                    new FormData(event.target)
-                );
-                console.log('[onSubmit] this.formValue: ', this.formValue);
+        onSubmit: (event) => {
+            console.log(
+                '[onSubmit] FormData(target): ',
+                new FormData(event.target)
+            );
+            console.log('[onSubmit] this.formValue: ', this.formValue);
 
-                // const { query, category, limit } = this.formValue;
-                // console.log('query: ', query);
-                // console.log('category: ', category);
-                // console.log('limit: ', limit);
+            // const { query, category, limit } = this.formValue;
+            // console.log('query: ', query);
+            // console.log('category: ', category);
+            // console.log('limit: ', limit);
 
-                const magnets = this.fetchTorrents(
-                    this.URL, {
-                    headers: this.HEADERS.encoded,
-                    method: 'POST',
-                    body: this.formValue, // new FormData(event.target)
-                },
-                );
-
-                this.magnets.push(magnets);
-
-                console.log('[onSubmit] this.magnets: ', this.magnets);
+            const magnets = this.fetchTorrents(
+                this.URL, {
+                headers: this.HEADERS.encoded,
+                method: 'POST',
+                body: this.formValue, // new FormData(event.target)
             },
+            );
+
+            this.magnets.push(magnets);
+
+            console.log('[onSubmit] this.magnets: ', this.magnets);
+        },
     },
 };
 </script>

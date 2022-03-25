@@ -2,41 +2,21 @@
     <section>
         <h1>magnet search</h1>
 
-        <form
-            class="mb-3"
-            enctype="application/x-www-form-urlencoded; UTF-8"
-            v-on:submit="onSubmit"
-        >
+        <form class="mb-3" enctype="application/x-www-form-urlencoded; UTF-8" v-on:submit="onSubmit">
             <div class="form-group">
                 <label for="query">Search</label>
-                <input
-                    v-model.trim="formValue.query"
-                    id="query"
-                    class="form-control"
-                    type="text"
-                    placeholder="What are you looking for?"
-                    required
-                />
+                <input v-model.trim="formValue.query" id="query" class="form-control" type="text"
+                    placeholder="What are you looking for?" required />
             </div>
             <div class="form-group">
                 <label for="category">Category</label>
-                <input
-                    v-model.trim="formValue.category"
-                    id="category"
-                    class="form-control"
-                    type="text"
-                    placeholder="e.g. Movies, Apps, All"
-                />
+                <input v-model.trim="formValue.category" id="category" class="form-control" type="text"
+                    placeholder="e.g. Movies, Apps, All" />
             </div>
             <div class="form-group">
                 <label for="limit">Limit</label>
-                <input
-                    v-model.number="formValue.limit"
-                    id="limit"
-                    class="form-control"
-                    type="number"
-                    placeholder="e.g. 10, 50, 100"
-                />
+                <input v-model.number="formValue.limit" id="limit" class="form-control" type="number"
+                    placeholder="e.g. 10, 50, 100" />
             </div>
             <button type="submit" class="pure-button pure-button-primary">
                 Search
@@ -74,8 +54,7 @@ export default {
             json: { 'Content-Type': 'application/json; charset=UTF-8' },
             text: { 'Content-Type': 'text/plain; charset=UTF-8' },
             encoded: {
-                'Content-Type':
-                    'application/x-www-form-urlencoded; charset=UTF-8',
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
             },
         },
         formValue: {

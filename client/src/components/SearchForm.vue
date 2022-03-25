@@ -77,6 +77,7 @@ export default {
         */
     },
     methods: {
+        /*
         getUrlParams: (form) => {
             const urlParams = new URLSearchParams();
 
@@ -86,6 +87,7 @@ export default {
 
             return JSON.stringify(urlParams);
         },
+        */
         fetchTorrents: async (url, opts) => {
             const res = await fetch(url, opts);
             const data = await res.json();
@@ -93,11 +95,7 @@ export default {
             return JSON.stringify(data);
         },
         onSubmit: (event) => {
-            console.log(
-                '[onSubmit] FormData(target): ',
-                new FormData(event.target)
-            );
-
+            // console.log('[onSubmit] FormData(target): ', new FormData(event.target));
             console.table(this.formValue);
 
             const magnets = this.fetchTorrents(this.URL, {

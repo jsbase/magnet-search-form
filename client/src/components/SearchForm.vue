@@ -46,7 +46,7 @@
         <ul>
             <li v-for="(magnet, key) in magnets">
                 <h4 v-if="magnet.title" class="mt-0 mb-1">
-                    {{ magnet.key }}: {{ magnet.title }}
+                    {{ key }}: {{ magnet.title }}
                 </h4>
                 <p v-if="magnet.seeds" class="mt-0 mb-1">
                     <span>Seeds: </span>

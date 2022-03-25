@@ -2,7 +2,7 @@
     <section>
         <h1>magnet search</h1>
 
-        <form class="mb-3" enctype="application/x-www-form-urlencoded; UTF-8" v-on:submit="onSubmit">
+        <form class="mb-3" v-on:submit.prevent="onSubmit">
             <div class="form-group">
                 <label for="query">Search</label>
                 <input v-model.trim="formValue.query" id="query" class="form-control" type="text"
@@ -26,7 +26,7 @@
         <ul>
             <li v-for="(magnet, idx) in magnets" :key="idx">
                 <h4 v-if="magnet.title" class="mt-0 mb-1">
-                    {{ idx }}.) {{ magnet.title }}
+                    <strong>{{ idx }}.)</strong> {{ magnet.title }}
                 </h4>
                 <p v-if="magnet.seeds" class="mt-0 mb-1">
                     <span>Seeds: </span>
@@ -51,23 +51,20 @@ export default {
     data: () => ({
         URL: 'http://localhost:3000/magnets', // `${process.env.HOST}:${process.env.PORT}/${process.env.API}`
         HEADERS: {
-            json: { 'Content-Type': 'application/json; charset=UTF-8' },
-            text: { 'Content-Type': 'text/plain; charset=UTF-8' },
-            encoded: {
-                'Content-Type':
-                    'application/x-www-form-urlencoded; charset=UTF-8',
-            },
+            json: { 'content-type': 'application/json; charset=utf-8' },
+            text: { 'content-type': 'text/plain; charset=utf-8' },
+            encoded: { 'content-type': 'application/x-www-form-urlencoded; charset=utf-8' },
         },
         formValue: {
-            query: '',
+            query: '1080p',
             category: 'All',
-            limit: 2,
+            limit: 1,
         },
         magnets: [],
     }),
     computed: {
         log() {
-            return console.log(`[computed] magnets: `, this.magnets);
+            return console.table(this.magnets);
         },
     },
     mounted() {
@@ -100,24 +97,17 @@ export default {
                 '[onSubmit] FormData(target): ',
                 new FormData(event.target)
             );
-            console.log('[onSubmit] this.formValue: ', this.formValue);
 
-            // const { query, category, limit } = this.formValue;
-            // console.log('query: ', query);
-            // console.log('category: ', category);
-            // console.log('limit: ', limit);
+            console.table(this.formValue);
 
-            const magnets = this.fetchTorrents(
-                this.URL, {
-                headers: this.HEADERS.encoded,
+            const magnets = this.fetchTorrents(this.URL, {
+                headers: this.HEADERS.json,
                 method: 'POST',
-                body: this.formValue, // new FormData(event.target)
-            },
-            );
+                body: this.formValue,
+            });
 
             this.magnets.push(magnets);
-
-            console.log('[onSubmit] this.magnets: ', this.magnets);
+            console.table(this.magnets);
         },
     },
 };

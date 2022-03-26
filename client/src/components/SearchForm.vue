@@ -71,7 +71,10 @@ export default {
         HEADERS: {
             json: { "content-type": "application/json; charset=utf-8" },
             text: { "content-type": "text/plain; charset=utf-8" },
-            encoded: { "content-type": "application/x-www-form-urlencoded; charset=utf-8" },
+            encoded: {
+                "content-type":
+                    "application/x-www-form-urlencoded; charset=utf-8",
+            },
         },
         formValue: {
             query: "1080p",

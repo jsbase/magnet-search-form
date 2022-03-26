@@ -1,10 +1,9 @@
 {
   "name": "magnet-search-form",
   "version": "0.0.2",
+  "license": "MIT",
   "description": "Search p2p files like magnets or torrents.",
-  "licence": "MIT",
   "main": "simple-server.js",
-  "type": "commonjs",
   "scripts": {
     "start:backend": "node simple-server.js",
     "start:frontend": "cd client/ && yarn run serve",

@@ -14,8 +14,7 @@
         <script type="module">
             (async () => {
                 const { imgBGF } = await import('./image-bg-fetcher.mjs');
-
-                imgBGF('layout');
+                imgBGF('poster');
             })();
         </script>
     </head>
@@ -41,10 +40,10 @@
                     </div>
                 </fieldset>
 
-                <button type="submit" class="pure-button pure-button-primary submit">🎯 Go</button>
+                <button type="submit" class="pure-button pure-button-primary submit">Search</button>
             </form>
 
-            <form action="/magnet" method="POST" enctype="application/json; charset=utf-8" class="pure-form pure-form-stacked">
+            <form action="/magnet" method="POST" enctype="application/json; charset=utf-8" class="pure-form pure-form-stacked pure-form--right">
                 <fieldset>
                     <div class="pure-control-group">
                         <label for="torrent">Found a torrent? Get the magnet</label>
@@ -52,7 +51,7 @@
                     </div>
                 </fieldset>
 
-                <button type="submit" class="pure-button pure-button-primary submit">🎯 Go</button>
+                <button type="submit" class="pure-button pure-button-primary submit">Get magnet</button>
             </form>
         </div>
     </body>

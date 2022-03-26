@@ -70,9 +70,6 @@ export default {
   data: () => ({
     URL: "http://localhost:3000/magnets",
     HEADERS: {
-      encoded: {
-        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
-      },
       json: {"Content-Type": "application/json; charset=UTF-8"},
       text: {"Content-Type": "text/plain; charset=UTF-8"}
     },
@@ -88,34 +85,22 @@ export default {
       return console.table(this.torrents);
     }
   },
-  mounted() {
-    /* const torrents = this.fetchTorrents(`${this.URL}`, {
-            query: getUrlParams(event.target)
-        });
-        this.torrents.push(torrents); */
-  },
+  mounted() {},
   methods: {
-    fetchTorrents: async (url, opts) => {
-      const res = await fetch(url, opts);
-      const data = await res.json();
-      return JSON.stringify(data);
-    },
-    /* getUrlParams: (form) => {
-            const urlParams = new URLSearchParams();
-            for (const pair of new FormData(form)) {
-                urlParams.append(pair[0], pair[1]);
-            }
-            return JSON.stringify(urlParams);
-        }, */
-    onSubmit: () => {
+    onSubmit: async () => {
       console.table(this.formValue);
-      const torrents = this.fetchTorrents(this.URL, {
-        headers: this.HEADERS.json,
+
+      const data = await this.fetch(this.URL, {
         method: "POST",
-        body: this.formValue
+        headers: this.HEADERS.json,
+        body: JSON.stringify(this.formValue)
       });
+      const torrents = await data.json();
+
       this.torrents.push(torrents);
       console.table(this.torrents);
+
+      return this.torrents;
     }
   }
 };
@@ -145,9 +130,9 @@ li {
   color: #fff;
   font-weight: 700;
   padding: 8px 12px;
-  margin-top: 15px auto 0;
+  margin: 15px auto 0;
   text-align: center;
-  width: 86%;
+  width: 100%;
 }
 .pure-button-primary:active,
 .pure-button-primary:focus,

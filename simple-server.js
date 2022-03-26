@@ -1,7 +1,7 @@
 const server = require('polka');
 const send = require('@polka/send-type');
 const morgan = require('morgan');
-// const cors = require('cors');
+const cors = require('cors');
 const parser = require('body-parser');
 const sirv = require('sirv');
 const TorrentSearchApi = require('torrent-search-api');
@@ -12,7 +12,7 @@ const { PORT = 3000 } = process.env;
 TorrentSearchApi.enablePublicProviders();
 
 server()
-    // .use(cors())
+    .use(cors())
     .use(morgan('combined'))
     .use(sirv('public'))
     .use(parser.json())
@@ -22,18 +22,20 @@ server()
                 query = '1080p',
                 category = 'All',
                 limit = 1
-            } = req.query;
+            } = req.body;
 
             console.log(`\n 
-                POST \n 
-                query:  ${query} \n 
-                category:  ${category} \n 
-                limit:  ${limit} \n 
+                [ POST ]\n
+                query:  ${query}\n
+                category:  ${category}\n
+                limit:  ${limit}\n
             `);
 
             const torrents = await TorrentSearchApi.search(query, category, limit);
 
-            console.log(' \n torrents: ', torrents, ' \n ');
+            console.log(`\n
+                torrents: ${JSON.stringify(torrents)}
+            \n`);
 
             // const getMagnet = async (_torrent) => await TorrentSearchApi.getMagnet(_torrent);
             // const magnets = Array.from(torrents).map(torrent => getMagnet(torrent));
@@ -43,13 +45,6 @@ server()
         } catch (err) {
             send(res, 404);
         }
-
-        /* res.writeHead(200, {
-           'content-type': 'application/json; charset=UTF-8'
-        });
-
-        let json = JSON.stringify(req.query);
-        res.end(json); */
     })
     .listen(PORT, () => {
         console.log(`> Running on localhost:${PORT}`);

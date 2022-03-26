@@ -1,12 +1,7 @@
 <template>
     <section>
         <h1>magnet search</h1>
-
-        <form
-            class="mb-3"
-            enctype="application/x-www-form-urlencoded; UTF-8"
-            v-on:submit="onSubmit"
-        >
+        <form class="mb-3" v-on:submit.prevent="onSubmit">
             <div class="form-group">
                 <label for="query">Search</label>
                 <input
@@ -15,6 +10,7 @@
                     class="form-control"
                     type="text"
                     placeholder="What are you looking for?"
+                    name="query"
                     required
                 />
             </div>
@@ -25,6 +21,7 @@
                     id="category"
                     class="form-control"
                     type="text"
+                    name="category"
                     placeholder="e.g. Movies, Apps, All"
                 />
             </div>
@@ -35,6 +32,7 @@
                     id="limit"
                     class="form-control"
                     type="number"
+                    name="limit"
                     placeholder="e.g. 10, 50, 100"
                 />
             </div>
@@ -42,11 +40,11 @@
                 Search
             </button>
         </form>
-
+        <!--  response -->
         <ul>
             <li v-for="(magnet, idx) in magnets" :key="idx">
                 <h4 v-if="magnet.title" class="mt-0 mb-1">
-                    {{ idx }}.) {{ magnet.title }}
+                    <strong>{{ idx }}.)</strong> {{ magnet.title }}
                 </h4>
                 <p v-if="magnet.seeds" class="mt-0 mb-1">
                     <span>Seeds: </span>
@@ -67,27 +65,24 @@
 
 <script>
 export default {
-    name: 'SearchForm',
+    name: "SearchForm",
     data: () => ({
-        URL: 'http://localhost:3000/magnets', // `${process.env.HOST}:${process.env.PORT}/${process.env.API}`
+        URL: "http://localhost:3000/magnets", // `${process.env.HOST}:${process.env.PORT}/${process.env.API}`
         HEADERS: {
-            json: { 'Content-Type': 'application/json; charset=UTF-8' },
-            text: { 'Content-Type': 'text/plain; charset=UTF-8' },
-            encoded: {
-                'Content-Type':
-                    'application/x-www-form-urlencoded; charset=UTF-8',
-            },
+            json: { "content-type": "application/json; charset=utf-8" },
+            text: { "content-type": "text/plain; charset=utf-8" },
+            encoded: { "content-type": "application/x-www-form-urlencoded; charset=utf-8" },
         },
         formValue: {
-            query: '',
-            category: 'All',
-            limit: 2,
+            query: "1080p",
+            category: "All",
+            limit: 1,
         },
         magnets: [],
     }),
     computed: {
         log() {
-            return console.log(`[computed] magnets: `, this.magnets);
+            return console.table(this.magnets);
         },
     },
     mounted() {
@@ -100,6 +95,7 @@ export default {
         */
     },
     methods: {
+        /*
         getUrlParams: (form) => {
             const urlParams = new URLSearchParams();
 
@@ -109,6 +105,7 @@ export default {
 
             return JSON.stringify(urlParams);
         },
+        */
         fetchTorrents: async (url, opts) => {
             const res = await fetch(url, opts);
             const data = await res.json();
@@ -116,26 +113,17 @@ export default {
             return JSON.stringify(data);
         },
         onSubmit: (event) => {
-            console.log(
-                '[onSubmit] FormData(target): ',
-                new FormData(event.target)
-            );
-            console.log('[onSubmit] this.formValue: ', this.formValue);
-
-            // const { query, category, limit } = this.formValue;
-            // console.log('query: ', query);
-            // console.log('category: ', category);
-            // console.log('limit: ', limit);
+            // console.log('[onSubmit] FormData(target): ', new FormData(event.target));
+            console.table(this.formValue);
 
             const magnets = this.fetchTorrents(this.URL, {
-                headers: this.HEADERS.encoded,
-                method: 'POST',
-                body: this.formValue, // new FormData(event.target)
+                headers: this.HEADERS.json,
+                method: "POST",
+                body: this.formValue,
             });
 
             this.magnets.push(magnets);
-
-            console.log('[onSubmit] this.magnets: ', this.magnets);
+            console.table(this.magnets);
         },
     },
 };
@@ -148,19 +136,16 @@ h1 {
     font-size: 4em;
     text-decoration: none;
 }
-
 ul {
     list-style-type: none;
     list-style-position: outside;
     margin: 1rem auto;
     width: 80%;
 }
-
 li {
     margin-top: 1rem;
     border: 1px solid #d1d1d1;
 }
-
 .pure-button-primary {
     background-color: tomato;
     border: 1px solid red;
@@ -172,7 +157,6 @@ li {
     text-align: center;
     width: 86%;
 }
-
 .pure-button-primary:active,
 .pure-button-primary:focus,
 .pure-button-primary:hover {

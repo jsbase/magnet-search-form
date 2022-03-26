@@ -2,21 +2,41 @@
     <section>
         <h1>magnet search</h1>
 
-        <form class="mb-3" enctype="application/x-www-form-urlencoded; UTF-8" v-on:submit="onSubmit">
+        <form
+            class="mb-3"
+            enctype="application/x-www-form-urlencoded; UTF-8"
+            v-on:submit="onSubmit"
+        >
             <div class="form-group">
                 <label for="query">Search</label>
-                <input v-model.trim="formValue.query" id="query" class="form-control" type="text"
-                    placeholder="What are you looking for?" required />
+                <input
+                    v-model.trim="formValue.query"
+                    id="query"
+                    class="form-control"
+                    type="text"
+                    placeholder="What are you looking for?"
+                    required
+                />
             </div>
             <div class="form-group">
                 <label for="category">Category</label>
-                <input v-model.trim="formValue.category" id="category" class="form-control" type="text"
-                    placeholder="e.g. Movies, Apps, All" />
+                <input
+                    v-model.trim="formValue.category"
+                    id="category"
+                    class="form-control"
+                    type="text"
+                    placeholder="e.g. Movies, Apps, All"
+                />
             </div>
             <div class="form-group">
                 <label for="limit">Limit</label>
-                <input v-model.number="formValue.limit" id="limit" class="form-control" type="number"
-                    placeholder="e.g. 10, 50, 100" />
+                <input
+                    v-model.number="formValue.limit"
+                    id="limit"
+                    class="form-control"
+                    type="number"
+                    placeholder="e.g. 10, 50, 100"
+                />
             </div>
             <button type="submit" class="pure-button pure-button-primary">
                 Search
@@ -107,13 +127,11 @@ export default {
             // console.log('category: ', category);
             // console.log('limit: ', limit);
 
-            const magnets = this.fetchTorrents(
-                this.URL, {
+            const magnets = this.fetchTorrents(this.URL, {
                 headers: this.HEADERS.encoded,
                 method: 'POST',
                 body: this.formValue, // new FormData(event.target)
-            },
-            );
+            });
 
             this.magnets.push(magnets);
 

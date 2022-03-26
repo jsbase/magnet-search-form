@@ -1,45 +1,44 @@
 const server = require("polka");
 const send = require("@polka/send-type");
 const morgan = require("morgan");
+//const cookieParser = require("cookie-parser");
 const cors = require("cors");
-const parser = require("body-parser");
+const {json} = require("body-parser");
 const sirv = require("sirv");
 const TorrentSearchApi = require("torrent-search-api");
 // const { crud } = require('./crud');
 
 const {PORT = 3000} = process.env;
+const STATUS = {success: 200, empty: 400, fail: 404};
 
 TorrentSearchApi.enablePublicProviders();
 
 server()
   .use(cors())
-  .use(morgan("combined"))
+  .use(morgan())
+  .use(json())
+  //.use(cookieParser())
   .use(sirv("public"))
-  .use(parser.json())
-  .post("/magnets", async (req, res) => {
+  .post("/torrents", async (req, res) => {
     try {
-      let {query = "1080p", category = "All", limit = 1} = req.body;
-
-      console.log(`\n 
-                [ POST ]\n
-                query:  ${query}\n
-                category:  ${category}\n
-                limit:  ${limit}\n
-            `);
-
+      const json = JSON.stringify(req.body);
+      const {query = "1080p", category = "All", limit = 1} = JSON.parse(json);
       const torrents = await TorrentSearchApi.search(query, category, limit);
-
-      console.log(`\n
-                torrents: ${JSON.stringify(torrents)}
-            \n`);
-
-      // const getMagnet = async (_torrent) => await TorrentSearchApi.getMagnet(_torrent);
-      // const magnets = Array.from(torrents).map(torrent => getMagnet(torrent));
-      // console.log(' \n magnets: ', magnets, ' \n ');
-
-      send(res, 200, torrents);
+      const filtered = torrents.filter(
+        (x) => parseInt(x?.peers) >= 1 && parseInt(x?.seeds) >= 1
+      );
+      send(res, STATUS.success, filtered);
     } catch (err) {
-      send(res, 404);
+      send(res, STATUS.fail);
+    }
+  })
+  .post("/magnet", async (req, res) => {
+    try {
+      const json = JSON.stringify(req.body);
+      const magnet = await TorrentSearchApi.getMagnet(JSON.parse(json).torrent);
+      send(res, STATUS.success, magnet);
+    } catch (err) {
+      send(res, STATUS.fail);
     }
   })
   .listen(PORT, () => {

@@ -11,17 +11,23 @@
         <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.6/build/pure-min.css" integrity="sha384-Uu6IeWbM+gzNVXJcM9XV3SohHtmWE+3VGi496jvgX1jyvDTXfdK+rfZc8C1Aehk5" crossorigin="anonymous">
         <link rel="stylesheet" href="/styles.css">
 
-        <script src="./image-bg-fetcher.js" defer></script>
+        <script type="module">
+            (async () => {
+                const { imgBGF } = await import('./image-bg-fetcher.mjs');
+
+                imgBGF('layout');
+            })();
+        </script>
     </head>
 
     <body>
         <div id="poster"></div>
         <div id="layout">
-            <h1>the torrent search engine</h1>
+            <h1>magnet search</h1>
 
             <!-- <form action="/magnets" method="POST" class="pure-form pure-form-stacked"> -->
             <!-- <form action="/magnets" method="POST" enctype="application/x-www-form-urlencoded; charset=utf-8" class="pure-form pure-form-stacked"> -->
-            <form action="/magnets" method="POST" enctype="application/json; charset=utf-8" class="pure-form pure-form-stacked">
+            <form action="/torrents" method="POST" enctype="application/json; charset=utf-8" class="pure-form pure-form-stacked">
                 <fieldset>
                     <div class="pure-control-group">
                         <label for="query">What are you searing for?</label>
@@ -32,6 +38,17 @@
 
                         <label for="limit">How many results?</label>
                         <input id="limit" name="limit" type="number" placeholder="e.g. 15, 50, 100, ...">
+                    </div>
+                </fieldset>
+
+                <button type="submit" class="pure-button pure-button-primary submit">🎯 Go</button>
+            </form>
+
+            <form action="/magnet" method="POST" enctype="application/json; charset=utf-8" class="pure-form pure-form-stacked">
+                <fieldset>
+                    <div class="pure-control-group">
+                        <label for="torrent">Found a torrent? Get the magnet</label>
+                        <textarea id="torrent" name="torrent" type="text" placeholder="magnet:..."></textarea>
                     </div>
                 </fieldset>
 

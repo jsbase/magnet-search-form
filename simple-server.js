@@ -18,7 +18,7 @@ server()
   .use(parser.json())
   .post("/magnets", async (req, res) => {
     try {
-      let {query = "1080p", category = "All", limit = 1} = req.body;
+      let {query = "1080p", category = "All", limit = 1} = req.query;
 
       console.log(`\n 
                 [ POST ]\n

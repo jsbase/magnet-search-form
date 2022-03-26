@@ -40,7 +40,6 @@
         Search
       </button>
     </form>
-    <!--  response -->
     <ul>
       <li v-for="(magnet, idx) in magnets" :key="idx">
         <h4 v-if="magnet.title" class="mt-0 mb-1">
@@ -69,11 +68,11 @@ export default {
   data: () => ({
     URL: "http://localhost:3000/magnets", // `${process.env.HOST}:${process.env.PORT}/${process.env.API}`
     HEADERS: {
-      json: {"content-type": "application/json; charset=utf-8"},
-      text: {"content-type": "text/plain; charset=utf-8"},
       encoded: {
-        "content-type": "application/x-www-form-urlencoded; charset=utf-8"
-      }
+        "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
+      },
+      json: {"Content-Type": "application/json; charset=utf-8'"},
+      text: {"Content-Type": "text/plain; charset=utf-8"}
     },
     formValue: {
       query: "1080p",

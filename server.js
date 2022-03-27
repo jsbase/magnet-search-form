@@ -1,120 +1,86 @@
-const {join} = require("path");
-// { createServer } = require('https'),
-// { readFileSync } = require('fs'),
-const server = require("polka");
-// const send = require('@polka/send')
-const send = require("@polka/send-type");
-const cors = require("cors");
+const {createServer} = require("https");
+const {readFileSync} = require("fs");
+// const fetch = require("node-fetch");
+const polka = require("polka");
+// const send = require("@polka/send-type");
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
+const cors = require("cors");
+const {post} = require("./crud");
+// const { send } = require('./util');
 const {json} = require("body-parser");
-const dir = join(__dirname, "public");
-const serve = require("serve-static")(dir);
+const sirv = require("sirv");
+/**
+ * @see https://github.com/JimmyLaurent/torrent-search-api
+ * */
 const TorrentSearchApi = require("torrent-search-api");
 
-const {API, HOST, PORT, NODE_ENV} = process.env;
-const isDev = NODE_ENV === "development";
-const STATUS = {success: 200, empty: 400, fail: 404};
-const WARNING = {empty: "Search query must not be empty!"};
+require("dotenv").config();
+
+const {
+  NODE_ENV,
+  HOST,
+  PORT
+  // TORRENTS_API,
+  // MAGNET_API
+} = process.env;
+const isDev = NODE_ENV !== "production";
+// const STATUS = {success: 200, empty: 400, fail: 404};
+
+/*
+const WARNING = {
+  success: "✅ Everything's fine",
+  notorrents: "⛔ Couldn't find any torrents",
+  nomagnet: "⛔ Couldn't find any magnet link"
+};
+*/
+
+/*
 const HEADER = {
   encoded: {"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"},
   json: {"Content-Type": "application/json; charset=UTF-8"},
   text: {"Content-Type": "text/plain; charset=UTF-8"}
 };
+*/
 
+// async request with node-fetch
 /*
-// https options
-const options = {
-    key: readFileSync('ssl/magnet-search-form.key'),
-    cert: readFileSync('ssl/magnet-search-form.crt'),
-};
-
-// dynamic request
-const load = async () => {
-    const result = await fetch(API);
-    return (await result.json());
+const load = async (url, opts) => {
+  const data = await fetch(url, opts);
+  const result = await result.json();
+  return result;
 };
 */
 
 TorrentSearchApi.enablePublicProviders();
+TorrentSearchApi.disableProvider("1337x"); // optional
 
-const getMagnets = async (req, res) => {
-  let {query, category, limit} = req.query;
-
-  query = query || "";
-  category = category || "All";
-  limit = limit || 1;
-
-  console.log(`\n\n GET \n query:  ${query}`);
-  console.log(` category:  ${category}`);
-  console.log(` limit:  ${limit}\n\n`);
-
-  const result = await TorrentSearchApi.search(query, category, limit);
-
-  send(res, STATUS.success, JSON.stringify(result));
-
-  // const filtered = Array.from(result).filter(
-  //    x => parseInt(x?.peers) >= 1 && parseInt(x?.seeds) >= 1
-  // );
-  // send(JSON.stringify(filtered), STATUS.success);
-  // res.writeHead(STATUS.success, HEADER.json)
-  // res.end(/* JSON.stringify(result) */)
-};
-
-const postMagnets = async (req, res) => {
-  console.log("\n\n", req);
-
-  if (!req.query) {
-    // send(WARNING.empty, STATUS.empty);
-    res.writeHead(STATUS.empty, HEADER.text);
-    res.end(WARNING.empty);
-  } else {
-    try {
-      // console.log(' \n query: ', JSON.stringify(req.query), ' \n ');
-
-      let {query, category, limit} = req.query;
-
-      query = query || "1080p";
-      category = category || "Movies";
-      limit = parseInt(limit, 10) || 1;
-
-      console.log(`\n POST \n query:  ${query}`);
-      console.log(` category:  ${category}`);
-      console.log(` limit:  ${limit} \n `);
-
-      const torrents = await TorrentSearchApi.search(query, category, limit);
-
-      console.log(" \n torrents: ", torrents, " \n ");
-
-      // const getMagnet = async (_torrent) => await TorrentSearchApi.getMagnet(_torrent);
-      // const magnets = Array.from(torrents).map(torrent => getMagnet(torrent));
-      // console.log(' \n magnets: ', magnets, ' \n ');
-
-      send(res, 200, torrents);
-    } catch (err) {
-      send(res, 404);
-    }
-  }
-};
-
-// const { handler } =
-server()
-  .use(morgan(isDev ? "dev" : "tiny", {immediate: isDev}))
+const polkaMiddleware = polka();
+polkaMiddleware
   .use(cors())
-  .use(cookieParser())
+  .use(morgan(isDev ? "dev" : "tiny", {immediate: isDev}))
   .use(json())
-  .get("/magnets", getMagnets)
-  .post("/magnets", postMagnets)
-  .use(serve)
-  .listen(PORT || 5000, () => {
+  .use(cookieParser())
+  .use(sirv("public"))
+  .use(post())
+  .post(); /*
+  .listen(PORT, () => {
     if (isDev) {
-      console.log(`API is now running on ${HOST}:${PORT}${API}`);
+      // eslint-disable-next-line no-console
+      console.log(`> Running on ${HOST}:${PORT}`);
     }
-  });
+  })
+  */
 
-/*
-createServer(options, handler).listen(PORT, (err) => {
-  if (err) { throw err; }
-  else { console.log(`Server running on localhost:${PORT}`); }
+createServer(
+  {
+    key: readFileSync("./ssl/magnet-search-form.key"),
+    cert: readFileSync("./ssl/magnet-search-form.crt")
+  },
+  polkaMiddleware
+).listen(PORT, () => {
+  if (isDev) {
+    // eslint-disable-next-line no-console
+    console.log(`> Running on ${HOST}:${PORT}`);
+  }
 });
-*/

@@ -66,6 +66,8 @@
 </template>
 
 <script>
+import console from "console";
+
 export default {
   name: "SearchForm",
 
@@ -87,37 +89,37 @@ export default {
   },
 
   created: async function () {
-    const requestOptions = {
+    const opts = {
       method: "POST",
       headers: {"Content-Type": "application/json; charset=UTF-8"},
       body: JSON.stringify(this.formValue)
     };
-    const response = await fetch(
-      "http://localhost:3000/torrents",
-      requestOptions
-    );
-    this.torrents = await response.json();
-    return;
+    const response = await fetch("http://localhost:3000/torrents", opts);
+    const torrents = await response.json();
+    eslint;
+    console.log("torrents", torrents);
+    this.torrents = JSON.parse(torrents);
+    return this.torrents;
   },
 
   methods: {
+    load: async (url, opts) => {
+      const data = await fetch(url, opts);
+      const result = await data.json();
+      console.log(`\n result: ${JSON.stringify(result)} \n`);
+      return result;
+    },
+
     onSubmit: function () {
-      const requestOptions = {
+      const opts = {
         method: "POST",
         headers: {"Content-Type": "application/json; charset=UTF-8"},
         body: JSON.stringify(this.formValue)
       };
-
-      const runSearch = async function () {
-        const response = await fetch(
-          "http://localhost:3000/torrents",
-          requestOptions
-        );
-        const searchResults = await response.json();
-        return searchResults;
-      };
-
-      this.torrents = runSearch();
+      console.log(`\n onSubmit \n this: `, this, `\n opts: `, opts, `\n`);
+      const torrents = this.load("http://localhost:3000/torrents", opts);
+      console.log(`torrents: ${JSON.stringify()}`);
+      this.torrents = torrents;
     }
   }
 };

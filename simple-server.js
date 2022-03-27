@@ -1,7 +1,7 @@
 const server = require("polka");
 const send = require("@polka/send-type");
 const morgan = require("morgan");
-//const cookieParser = require("cookie-parser");
+const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const {json} = require("body-parser");
 const sirv = require("sirv");
@@ -15,9 +15,9 @@ TorrentSearchApi.enablePublicProviders();
 
 server()
   .use(cors())
-  .use(morgan())
+  .use(morgan("dev"))
   .use(json())
-  //.use(cookieParser())
+  .use(cookieParser())
   .use(sirv("public"))
   .post("/torrents", async (req, res) => {
     try {

@@ -1,106 +1,123 @@
 <template>
-  <section>
-    <h1>magnet search</h1>
-    <form class="mb-3" v-on:submit.prevent="onSubmit">
-      <div class="form-group">
-        <label for="query">Search</label>
-        <input
-          v-model.trim="formValue.query"
-          id="query"
-          class="form-control"
-          type="text"
-          placeholder="What are you looking for?"
-          name="query"
-          required
-        />
-      </div>
-      <div class="form-group">
-        <label for="category">Category</label>
-        <input
-          v-model.trim="formValue.category"
-          id="category"
-          class="form-control"
-          type="text"
-          name="category"
-          placeholder="e.g. Movies, Apps, All"
-        />
-      </div>
-      <div class="form-group">
-        <label for="limit">Limit</label>
-        <input
-          v-model.number="formValue.limit"
-          id="limit"
-          class="form-control"
-          type="number"
-          name="limit"
-          placeholder="e.g. 10, 50, 100"
-        />
-      </div>
-      <button type="submit" class="pure-button pure-button-primary">
-        Search
-      </button>
-    </form>
-    <ul>
-      <li v-for="(torrent, idx) in torrents" :key="idx">
-        <h4 v-if="torrent.title" class="mt-0 mb-1">
-          <strong>{{ idx }}.)</strong>
-          {{ torrent.title }}
-        </h4>
-        <p v-if="torrent.seeds" class="mt-0 mb-1">
-          <span>Seeds:</span>
-          {{ torrent.seeds }}
-        </p>
-        <p v-if="torrent.peers" class="mt-0 mb-1">
-          <span>Peers:</span>
-          {{ torrent.peers }}
-        </p>
-        <p>
-          <span>{{ torrent.provider }}</span>
-          <span>Link:</span>
-          <a :href="torrent.desc">{{ torrent.desc }}</a>
-        </p>
-      </li>
-    </ul>
-  </section>
+  <main>
+    <section id="poster"></section>
+    <section id="layout">
+      <h1>magnet search</h1>
+      <form class="pure-form pure-form-stacked" v-on:submit.prevent="onSubmit">
+        <fieldset class="pure-control-group">
+          <label for="query">Search</label>
+          <input
+            v-model.trim="formValue.query"
+            id="query"
+            class="form-control"
+            type="text"
+            placeholder="What are you looking for?"
+            name="query"
+            required
+          />
+        </fieldset>
+        <fieldset class="pure-control-group">
+          <label for="category">Category</label>
+          <input
+            v-model.trim="formValue.category"
+            id="category"
+            class="form-control"
+            type="text"
+            name="category"
+            placeholder="e.g. Movies, Apps, All"
+          />
+
+          <label for="limit">Limit</label>
+          <input
+            v-model.number="formValue.limit"
+            id="limit"
+            class="form-control"
+            type="number"
+            name="limit"
+            placeholder="e.g. 10, 50, 100"
+          />
+        </fieldset>
+        <button type="submit" class="pure-button pure-button-primary">
+          Search
+        </button>
+      </form>
+      <ul>
+        <li v-for="(torrent, idx) in torrents" :key="idx">
+          <h4 v-if="torrent.title" class="mt-0 mb-1">
+            <strong>{{ idx + 1 }}.</strong> {{ torrent.title }}
+          </h4>
+          <p v-if="torrent.seeds" class="mt-0 mb-1">
+            <span>Seeds:</span>
+            {{ torrent.seeds }}
+          </p>
+          <p v-if="torrent.peers" class="mt-0 mb-1">
+            <span>Peers:</span>
+            {{ torrent.peers }}
+          </p>
+          <p>
+            <span>{{ torrent.provider }}</span>
+            <span>Link:</span>
+            <a :href="torrent.desc">{{ torrent.desc }}</a>
+          </p>
+        </li>
+      </ul>
+    </section>
+  </main>
 </template>
 
 <script>
 export default {
   name: "SearchForm",
-  data: () => ({
-    URL: "http://localhost:3000/magnets",
-    HEADERS: {
-      json: {"Content-Type": "application/json; charset=UTF-8"},
-      text: {"Content-Type": "text/plain; charset=UTF-8"}
-    },
-    formValue: {
-      query: "",
-      category: "All",
-      limit: 1
-    },
-    torrents: []
-  }),
+
   computed: {
-    log() {
+    log: function () {
       return console.table(this.torrents);
     }
   },
-  mounted() {},
+
+  data: function () {
+    return {
+      formValue: {
+        query: "",
+        category: "All",
+        limit: 1
+      },
+      torrents: []
+    };
+  },
+
+  created: async function () {
+    const requestOptions = {
+      method: "POST",
+      headers: {"Content-Type": "application/json; charset=UTF-8"},
+      body: JSON.stringify(this.formValue)
+    };
+    const response = await fetch(
+      "http://localhost:3000/torrents",
+      requestOptions
+    );
+    this.torrents = await response.json();
+    return;
+  },
+
   methods: {
-    onSubmit: async () => {
-      console.table(this.formValue);
-
-      const data = await this.fetch(this.URL, {
+    onSubmit: function () {
+      const requestOptions = {
         method: "POST",
-        headers: this.HEADERS.json,
+        headers: {"Content-Type": "application/json; charset=UTF-8"},
         body: JSON.stringify(this.formValue)
-      });
-      const torrents = await data.json();
+      };
 
-      this.torrents.push(torrents);
-      console.table(this.torrents);
+      const runSearch = async function () {
+        const response = await fetch(
+          "http://localhost:3000/torrents",
+          requestOptions
+        );
+        const searchResults = await response.json();
+        return searchResults;
+      };
 
-      return this.torrents;
+      this.torrents = runSearch();
     }
   }
 };

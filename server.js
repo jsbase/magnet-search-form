@@ -1,13 +1,13 @@
-const {createServer} = require("https");
-const {readFileSync} = require("fs");
+// const {createServer} = require("https");
+// const {readFileSync} = require("fs");
 // const fetch = require("node-fetch");
 const polka = require("polka");
 // const send = require("@polka/send-type");
+// const { send } = require('./util');
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
-const {post} = require("./crud");
-// const { send } = require('./util');
+const crud = require("./crud");
 const {json} = require("body-parser");
 const sirv = require("sirv");
 /**
@@ -17,25 +17,16 @@ const TorrentSearchApi = require("torrent-search-api");
 
 require("dotenv").config();
 
-const {
-  NODE_ENV,
-  HOST,
-  PORT
-  // TORRENTS_API,
-  // MAGNET_API
-} = process.env;
-const isDev = NODE_ENV !== "production";
-// const STATUS = {success: 200, empty: 400, fail: 404};
+const {NODE_ENV, HOST, PORT, TORRENTS_API, MAGNET_API} = process.env;
 
+const isDev = NODE_ENV !== "production";
 /*
+const STATUS = {success: 200, empty: 400, fail: 404};
 const WARNING = {
   success: "✅ Everything's fine",
   notorrents: "⛔ Couldn't find any torrents",
   nomagnet: "⛔ Couldn't find any magnet link"
 };
-*/
-
-/*
 const HEADER = {
   encoded: {"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"},
   json: {"Content-Type": "application/json; charset=UTF-8"},
@@ -55,23 +46,22 @@ const load = async (url, opts) => {
 TorrentSearchApi.enablePublicProviders();
 TorrentSearchApi.disableProvider("1337x"); // optional
 
-const polkaMiddleware = polka();
-polkaMiddleware
+// const polkaMiddleware = polka();
+polka()
   .use(cors())
   .use(morgan(isDev ? "dev" : "tiny", {immediate: isDev}))
   .use(json())
   .use(cookieParser())
   .use(sirv("public"))
-  .use(post())
-  .post(); /*
+  .use(TORRENTS_API, crud) //.use(MAGNET_API, post)
   .listen(PORT, () => {
     if (isDev) {
       // eslint-disable-next-line no-console
       console.log(`> Running on ${HOST}:${PORT}`);
     }
-  })
-  */
+  });
 
+/*
 createServer(
   {
     key: readFileSync("./ssl/magnet-search-form.key"),
@@ -84,3 +74,4 @@ createServer(
     console.log(`> Running on ${HOST}:${PORT}`);
   }
 });
+*/

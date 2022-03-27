@@ -66,8 +66,6 @@
 </template>
 
 <script>
-import console from "console";
-
 export default {
   name: "SearchForm",
 
@@ -84,42 +82,63 @@ export default {
         category: "All",
         limit: 1
       },
-      torrents: []
+      torrents: [],
+      headers: {
+        json: {"Content-Type": "application/json; charset=UTF-8"}
+      }
     };
   },
 
   created: async function () {
     const opts = {
       method: "POST",
-      headers: {"Content-Type": "application/json; charset=UTF-8"},
+      headers: this.headers.json,
       body: JSON.stringify(this.formValue)
     };
     const response = await fetch("http://localhost:3000/torrents", opts);
-    const torrents = await response.json();
-    eslint;
-    console.log("torrents", torrents);
-    this.torrents = JSON.parse(torrents);
+    const result = JSON.parse(await response.json());
+    // eslint-disable-next-line no-console
+    console.log(
+      `\n on created \n this: `,
+      this,
+      `\n torrents: ${JSON.stringify(result)} \n`
+    );
+    this.torrents.length = 0;
+    this.torrents = this.torrents.concat(result);
     return this.torrents;
   },
 
   methods: {
     load: async (url, opts) => {
-      const data = await fetch(url, opts);
-      const result = await data.json();
-      console.log(`\n result: ${JSON.stringify(result)} \n`);
-      return result;
+      const response = await fetch(url, opts);
+      const result = await response.json();
+      // eslint-disable-next-line no-console
+      console.log(
+        `\n on load \n this: `,
+        this,
+        `\n result: ${JSON.stringify(result)} \n`
+      );
+      return JSON.parse(result);
     },
 
     onSubmit: function () {
       const opts = {
         method: "POST",
-        headers: {"Content-Type": "application/json; charset=UTF-8"},
+        headers: this.headers.json,
         body: JSON.stringify(this.formValue)
       };
-      console.log(`\n onSubmit \n this: `, this, `\n opts: `, opts, `\n`);
-      const torrents = this.load("http://localhost:3000/torrents", opts);
-      console.log(`torrents: ${JSON.stringify()}`);
-      this.torrents = torrents;
+      // eslint-disable-next-line no-console
+      console.log(
+        `\n on submit
+         \n this: `,
+        this,
+        `\n opts: ${JSON.stringify(opts)}
+      \n`
+      );
+      const result = this.load("http://localhost:3000/torrents", opts);
+      console.log(`\n torrents: ${JSON.stringify(result)} \n`);
+      this.torrents.length = 0;
+      this.torrents = this.torrents.concat(result);
     }
   }
 };

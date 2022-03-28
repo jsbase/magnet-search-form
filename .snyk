@@ -6,3 +6,6 @@ patch:
   'npm:uglify-js:20151024':
     - require > uglify-js:
         patched: '2022-03-28T13:44:32.545Z'
+  'npm:uglify-js:20150824':
+    - require > uglify-js:
+        patched: '2022-03-28T23:44:47.434Z'

@@ -9,13 +9,90 @@
         <link rel="icon" href="favicon.ico">
         <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" crossorigin="anonymous">
         <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.6/build/pure-min.css" integrity="sha384-Uu6IeWbM+gzNVXJcM9XV3SohHtmWE+3VGi496jvgX1jyvDTXfdK+rfZc8C1Aehk5" crossorigin="anonymous">
-        <link rel="stylesheet" href="/styles.css">
 
+        <style>
+        body {
+            color: rgba(240, 241, 241, 0.924);
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            height: 100vh;
+            width: 100vw;
+            overflow-x: hidden;
+        }
+        a {
+            text-decoration: none;
+            color: #1b98f8;
+        }
+        h1 {
+            margin-right: 1rem;
+        }
+        #poster {
+            height: 100vh;
+            width: 100vw;
+        }
+        #poster img {
+            min-height: 100vh;
+            min-width: 100vw;
+        }
+        #layout {
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            align-items: center;
+            flex-flow: column nowrap;
+            justify-content: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        .pure-form-stacked {
+            position: absolute;
+        }
+        .pure-form {
+            transform: translate(-5rem, 0);
+        }
+        .pure-form--right {
+            transform: translate(20rem, 0);
+        }
+        .primary-button {
+            box-shadow: none;
+            border-radius: 20px;
+            color: #fff;
+            background: #1b98f8;
+            margin: 1em 0;
+        }
+        </style>
+
+        <!-- deferred by default when loaded as module -->
         <script type="module">
-            (async () => {
-                const { imgBGF } = await import('./image-bg-fetcher.mjs');
-                imgBGF('poster');
-            })();
+            (function () {
+                // background image
+                //const { imgBGF } = await import('./image-bg-fetcher.mjs');
+                //imgBGF('poster');
+
+                // form submit
+                const fetchTorrents = async (url, opts) => await fetch(url, opts)
+                const torrents = async (payload) => {
+                    const response = await fetchTorrents('http://localhost:3000/torrents', {
+                        method: "POST",
+                        body: payload
+                    });
+                    const data = await response.json();
+                    console.table(data);
+                    return data;
+                };
+                const searchForm = document.getElementById('search-form');
+
+                searchForm.addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    const payload = new FormData(event.target);
+                    let data = torrents(payload);
+                    document.getElementById('result').innerHTML = JSON.stringify(data);
+                    return false;
+                });
+            }())
         </script>
     </head>
 
@@ -24,7 +101,7 @@
         <div id="layout">
             <h1>magnet search</h1>
 
-            <form action="/torrents" method="POST" class="pure-form pure-form-stacked">
+            <form id="search-form" action="/torrents" method="POST" class="pure-form pure-form-stacked">
                 <fieldset>
                     <div class="pure-control-group">
                         <label for="query">What are you searing for?</label>
@@ -51,6 +128,10 @@
 
                 <button type="submit" class="pure-button pure-button-primary submit">Get magnet</button>
             </form>
+
+            <hr>
+
+            <div id="result"></div>
         </div>
     </body>
 </html>

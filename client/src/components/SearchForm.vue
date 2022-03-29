@@ -3,7 +3,7 @@
     <section id="poster"></section>
     <section id="layout">
       <h1>magnet search</h1>
-      <form class="pure-form pure-form-stacked" v-on:submit.prevent="onSubmit">
+      <form class="pure-form pure-form-stacked" v-on:submit.prevent="submit">
         <fieldset class="pure-control-group">
           <label for="query">Search</label>
           <input
@@ -121,7 +121,11 @@ export default {
       return JSON.parse(result);
     },
 
-    onSubmit: function () {
+    submit: function () {
+      // eslint-disable-next-line no-console
+      console.log("this: ", this);
+      // eslint-disable-next-line no-console
+      console.log("this.formValue: ", this.formValue);
       const opts = {
         method: "POST",
         headers: this.headers.json,

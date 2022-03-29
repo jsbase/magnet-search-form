@@ -11,11 +11,24 @@
         <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.6/build/pure-min.css" integrity="sha384-Uu6IeWbM+gzNVXJcM9XV3SohHtmWE+3VGi496jvgX1jyvDTXfdK+rfZc8C1Aehk5" crossorigin="anonymous">
         <link rel="stylesheet" href="/styles.css">
 
+        <!-- deferred by default when loaded as module -->
         <script type="module">
-            (async () => {
+            (function () {
+                // background image
                 const { imgBGF } = await import('./image-bg-fetcher.mjs');
                 imgBGF('poster');
-            })();
+
+                // form submit
+                const form = document.getElementById('search-form');
+
+                form.addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    const payload = new FormData(event.target);
+                    alert(JSON.stringify(payload));
+                    // TODO: fetch here
+                    return false;
+                });
+            }())
         </script>
     </head>
 
@@ -24,7 +37,7 @@
         <div id="layout">
             <h1>magnet search</h1>
 
-            <form action="/torrents" method="POST" class="pure-form pure-form-stacked">
+            <form id="search-form" action="/torrents" method="POST" class="pure-form pure-form-stacked">
                 <fieldset>
                     <div class="pure-control-group">
                         <label for="query">What are you searing for?</label>

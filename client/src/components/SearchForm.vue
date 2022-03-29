@@ -82,67 +82,60 @@ export default {
         category: "All",
         limit: 1
       },
-      torrents: [],
-      headers: {
-        json: {"Content-Type": "application/json; charset=UTF-8"}
-      }
+      torrents: []
     };
   },
 
-  created: async function () {
+  created: function () {
     const opts = {
       method: "POST",
-      headers: this.headers.json,
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+      },
       body: JSON.stringify(this.formValue)
     };
-    const response = await fetch("http://localhost:3000/torrents", opts);
-    const result = JSON.parse(await response.json());
-    // eslint-disable-next-line no-console
-    console.log(
-      `\n on created \n this: `,
-      this,
-      `\n torrents: ${JSON.stringify(result)} \n`
-    );
-    this.torrents.length = 0;
-    this.torrents = this.torrents.concat(result);
-    return this.torrents;
+    const torrents = this.load("http://localhost:3000/torrents", opts);
+
+    console.log("created: ", torrents);
+
+    torrents.then((torr) => {
+      this.torrents.length = 0;
+      this.torrents = this.torrents.concat(torr);
+    });
   },
 
   methods: {
     load: async (url, opts) => {
       const response = await fetch(url, opts);
       const result = await response.json();
-      // eslint-disable-next-line no-console
-      console.log(
-        `\n on load \n this: `,
-        this,
-        `\n result: ${JSON.stringify(result)} \n`
-      );
-      return JSON.parse(result);
+      return result.then((data) => {
+        Promise.resolve(data);
+      });
     },
 
-    submit: function () {
-      // eslint-disable-next-line no-console
-      console.log("this: ", this);
-      // eslint-disable-next-line no-console
+    submit: function (event) {
+      event.preventDefault();
+
       console.log("this.formValue: ", this.formValue);
+
       const opts = {
         method: "POST",
-        headers: this.headers.json,
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+        },
         body: JSON.stringify(this.formValue)
       };
-      // eslint-disable-next-line no-console
-      console.log(
-        `\n on submit
-         \n this: `,
-        this,
-        `\n opts: ${JSON.stringify(opts)}
-      \n`
-      );
+
+      //console.log(`\n submit \n opts: ${JSON.stringify(opts)} \n`);
+
       const result = this.load("http://localhost:3000/torrents", opts);
-      console.log(`\n torrents: ${JSON.stringify(result)} \n`);
-      this.torrents.length = 0;
-      this.torrents = this.torrents.concat(result);
+      result.then((torrents) => {
+        console.log(`\n torrents: ${JSON.stringify(torrents)} \n`);
+        this.torrents.length = 0;
+        this.torrents = this.torrents.concat(torrents);
+      });
+
+      return false;
     }
   }
 };

@@ -12,15 +12,15 @@ module.exports = async function torrents(req, res) {
       `{ "query": "${query}", "category": "${category}", "limit": ${limit}`
     );
     let torrents = await TorrentSearchApi.search(query, category, limit);
-    console.log(`{ "torrents": "${torrents}"`);
-    console.log(`{ "torrents.stringify: ": "${JSON.stringify(torrents)}"`);
 
+    torrents.then((data) => {
+      console.log("LALA: ", data);
+    });
     /*
     const filtered = torrents.filter(
       (x) => parseInt(x?.peers) >= 1 && parseInt(x?.seeds) >= 1
     );
     */
-
     if (!torrents) {
       send(res, status.empty, warning);
     } else {

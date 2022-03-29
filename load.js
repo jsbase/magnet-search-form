@@ -34,16 +34,16 @@ async function loadJson(url) {
 module.exports = async function asyncFetch(req, res) {
   let name = req.body.query || "jsbase";
   let user;
-  
-    try {
-      user = await loadJson(`https://api.github.com/users/${name}`);
-    } catch (err) {
-      if (err instanceof HttpError && err.response.status == 404) {
-        res.end("No such user, please reenter.");
-      } else {
-        res.end(err);
-      }
+
+  try {
+    user = await loadJson(`https://api.github.com/users/${name}`);
+  } catch (err) {
+    if (err instanceof HttpError && err.response.status == 404) {
+      res.end("No such user, please reenter.");
+    } else {
+      res.end(err);
     }
-  
+  }
+
   res.send(200, user);
 };

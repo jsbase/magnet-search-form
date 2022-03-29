@@ -1,9 +1,14 @@
 <template>
-  <main>
-    <section id="poster"></section>
-    <section id="layout">
+  <section>
+    <div id="poster"></div>
+    <div id="layout">
       <h1>magnet search</h1>
-      <form class="pure-form pure-form-stacked" v-on:submit.prevent="submit">
+      <form
+        ref="form"
+        accept-charset="UTF-8"
+        class="pure-form pure-form-stacked"
+        v-on:submit.prevent="submit"
+      >
         <fieldset class="pure-control-group">
           <label for="query">Search</label>
           <input
@@ -54,15 +59,17 @@
             <span>Peers:</span>
             {{ torrent.peers }}
           </p>
-          <p>
+          <p v-if="torrent.desc && torrent.provider">
             <span>{{ torrent.provider }}</span>
             <span>Link:</span>
             <a :href="torrent.desc">{{ torrent.desc }}</a>
           </p>
         </li>
+        <li v-if="torrents && torrents.length === 0">No results.</li>
+        <li v-if="error">{{ error }}</li>
       </ul>
-    </section>
-  </main>
+    </div>
+  </section>
 </template>
 
 <script>
@@ -73,67 +80,108 @@ export default {
     log: function () {
       return console.table(this.torrents);
     }
+    //url: `${this.protocol}://${this.host}:${this.port}${this.torrentsApi}
   },
 
-  data: function () {
+  data() {
     return {
+      url: "http://localhost:3000/torrents",
       formValue: {
-        query: "",
-        category: "All",
-        limit: 1
+        query: "1080p",
+        category: "Movies",
+        limit: 3
       },
-      torrents: []
+      torrents: [],
+      error: null,
+      options: {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json; charset=UTF-8",
+          Origin: "http://localhost:3000",
+          Referer: "http://localhost:3000/torrents",
+          Connection: "Keep-Alive",
+          "Keep-Alive": "timeout=12, max=1000",
+          "Access-Control-Allow-Origin": "*" //"Cache-Control": "no-cache"
+        }
+      }
     };
   },
 
-  created: function () {
-    const opts = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+  created() {
+    const options = Object.assign(
+      {
+        body: JSON.stringify(this.formValue)
       },
-      body: JSON.stringify(this.formValue)
-    };
-    const torrents = this.load("http://localhost:3000/torrents", opts);
+      this.options
+    );
 
-    console.log("created: ", torrents);
+    const result = this.load(this.url, options);
+    //alert(`url: ${this.url} \n options: ${JSON.stringify(options)}`);
 
-    torrents.then((torr) => {
-      this.torrents.length = 0;
-      this.torrents = this.torrents.concat(torr);
-    });
+    result
+      .then(function (torrents) {
+        // console.log("torr: ", torr);
+        //alert(`torrents: ${JSON.stringify(torrents)}`);
+        this.torrents = this.torrents.concat(torrents);
+      })
+      .catch(function (error) {
+        this.error = error;
+        //alert(`error: ${typeof error === "string" ? error : JSON.stringify(error)}`);
+        console.error("Error: ", error);
+      });
   },
 
   methods: {
-    load: async (url, opts) => {
-      const response = await fetch(url, opts);
-      const result = await response.json();
-      return result.then((data) => {
-        Promise.resolve(data);
-      });
+    async load(url, opts) {
+      //alert(`[load] url: ${url}`);
+      let response = await fetch(url, opts);
+      let data = await response.json();
+      const json = JSON.stringify(data);
+      //alert(`[load] json: ${json}`);
+      const result = JSON.parse(json);
+      return result;
     },
 
-    submit: function (event) {
-      event.preventDefault();
+    submit() {
+      //e.preventDefault();
+      /* alert(
+          `submit \n url: ${this.url} \n formValue: ${JSON.stringify(
+            this.formValue
+          )}`
+        ); */
+      // console.log(`\n formValue: ${JSON.stringify(this.formValue)}`);
 
-      console.log("this.formValue: ", this.formValue);
-
-      const opts = {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+      const options = Object.assign(
+        {
+          body: JSON.stringify(this.formValue)
         },
-        body: JSON.stringify(this.formValue)
-      };
+        this.options
+      );
 
-      //console.log(`\n submit \n opts: ${JSON.stringify(opts)} \n`);
+      this.torrents.length = 0;
+      this.error = null;
 
-      const result = this.load("http://localhost:3000/torrents", opts);
-      result.then((torrents) => {
-        console.log(`\n torrents: ${JSON.stringify(torrents)} \n`);
-        this.torrents.length = 0;
-        this.torrents = this.torrents.concat(torrents);
-      });
+      // console.log(`opts: ${JSON.stringify(opts)}`);
+      // alert(`opts: ${JSON.stringify(opts)}`);
+      const result = this.load(this.url, options);
+
+      //alert(`torrents: ${JSON.stringify(this.torrents)}`);
+
+      result
+        .then(function (torrents) {
+          //alert(`torrents [${typeof torrents}]: ${JSON.stringify(torrents)}`);
+          //this.torrents = this.torrents.concat(torrents);
+          this.torrents = torrents;
+          alert(
+            `torrents [${typeof this.torrents}]: ${JSON.stringify(
+              this.torrents
+            )}`
+          );
+        })
+        .catch(function (error) {
+          this.error = error;
+          console.error("Error: ", error);
+        });
 
       return false;
     }
@@ -151,8 +199,12 @@ h1 {
 ul {
   list-style-type: none;
   list-style-position: outside;
-  margin: 1rem auto;
-  width: 80%;
+  margin: 2rem 1rem;
+  width: 100%;
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: stretch;
+  justify-content: stretch;
 }
 li {
   margin-top: 1rem;
@@ -160,12 +212,12 @@ li {
 }
 .pure-button-primary {
   background-color: tomato;
-  border: 1px solid red;
+  border: 1px solid tomato;
   border-radius: 5px;
   color: #fff;
   font-weight: 700;
-  padding: 8px 12px;
-  margin: 15px auto 0;
+  padding: 0.3rem;
+  margin: 1rem 0;
   text-align: center;
   width: 100%;
 }

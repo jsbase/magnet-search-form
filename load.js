@@ -1,5 +1,12 @@
-/* eslint-disable no-undef */
 const fetch = require("node-fetch");
+
+class HttpError extends Error {
+  constructor(response) {
+    super(`${response.status} for ${response.url}`);
+    this.name = "HttpError";
+    this.response = response;
+  }
+}
 
 // async request with node-fetch
 /*
@@ -9,14 +16,6 @@ const load = async (url, opts) => {
     return result;
 };
 */
-
-class HttpError extends Error {
-  constructor(response) {
-    super(`${response.status} for ${response.url}`);
-    this.name = "HttpError";
-    this.response = response;
-  }
-}
 
 async function loadJson(url) {
   let response = await fetch(url);
@@ -30,27 +29,21 @@ async function loadJson(url) {
 /**
  * @name asyncFetch
  * @description Ask for a user name until github returns a valid user
- * @usage demoGithubUser()
+ * @usage asyncFetch(res, req, next)
  */
-module.exports = async function asyncFetch() {
+module.exports = async function asyncFetch(req, res) {
+  let name = req.body.query || "jsbase";
   let user;
-
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
-    let name = prompt("Enter a name?", "iliakan");
-
+  
     try {
       user = await loadJson(`https://api.github.com/users/${name}`);
-      break; // no error, exit loop
     } catch (err) {
       if (err instanceof HttpError && err.response.status == 404) {
-        alert("No such user, please reenter.");
+        res.end("No such user, please reenter.");
       } else {
-        throw err;
+        res.end(err);
       }
     }
-  }
-
-  alert(`Full name: ${user.name}.`);
-  return user;
+  
+  res.send(200, user);
 };

@@ -8,24 +8,23 @@ module.exports = async function torrents(req, res) {
   try {
     let json = JSON.stringify(req.body);
     let {query = "1080p", category = "All", limit = 1} = JSON.parse(json);
-    console.log(
-      `{ "query": "${query}", "category": "${category}", "limit": ${limit}`
-    );
+//    console.log(
+//      `{ "query": "${query}", "category": "${category}", "limit": ${limit}`
+//    );
     let torrents = await TorrentSearchApi.search(query, category, limit);
-
-    torrents.then((data) => {
-      console.log("LALA: ", data);
-    });
+    //console.log('torrents: ', torrents);
+    send(res, status.success, torrents);
     /*
     const filtered = torrents.filter(
       (x) => parseInt(x?.peers) >= 1 && parseInt(x?.seeds) >= 1
     );
-    */
-    if (!torrents) {
+    */    
+    /*if (!torrents || !torrents.length) {
       send(res, status.empty, warning);
     } else {
       send(res, status.success, torrents, headers);
-    }
+    }*/
+    //return Promise.resolve(torrents);
   } catch (err) {
     send(res, status.fail, warning);
   }

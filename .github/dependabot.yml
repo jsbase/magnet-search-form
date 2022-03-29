@@ -1,0 +1,22 @@
+# see: https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    labels:
+      - "npm"
+      - "dependencies"
+      - "backend"
+    versioning-strategy: widen
+
+  - package-ecosystem: "npm"
+    directory: "/client"
+    schedule:
+      interval: "daily"
+    labels:
+      - "npm"
+      - "dependencies"
+      - "frontend"
+    versioning-strategy: widen

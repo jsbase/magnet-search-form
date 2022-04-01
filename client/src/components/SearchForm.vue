@@ -42,7 +42,7 @@
         </button>
       </form>
       <ul>
-        <li v-for="torrent in torrents" :key="torrent.title">
+        <li v-for="torrent in torrents" :key="torrent.id">
           <h4 class="mt-0 mb-1">
             {{ torrent.title }}
           </h4>
@@ -60,10 +60,6 @@
             <a :href="torrent.desc">{{ torrent.desc }}</a>
           </p>
         </li>
-        <!--
-                                                        <li v-if="torrents && torrents.length === 0">No results.</li>
-                                                        <li v-if="error">{{ error }}</li>
-                                                        -->
       </ul>
     </div>
   </section>
@@ -87,15 +83,16 @@ export default {
       formValue: {
         query: "1080p",
         category: "Movies",
-        limit: 3
+        limit: 2
       },
       torrents: [],
       options: {
         method: "POST",
         headers: {
           "Content-Type": "application/json; charset=UTF-8",
+          "Access-Control-Allow-Origin": "*",
           Origin: "http://localhost:8080",
-          "Access-Control-Allow-Origin": "*"
+          Referer: "http://localhost:3000/torrents"
         }
       }
     };
@@ -105,12 +102,6 @@ export default {
     //Connection: "Keep-Alive",
     //"Keep-Alive": "timeout=12, max=1000",
     //"Cache-Control": "no-cache"
-  },
-
-  watch: {
-    submit() {
-      this.torrents = this.torrents.map((t) => t);
-    }
   },
 
   /*
@@ -140,17 +131,26 @@ export default {
     */
   methods: {
     async load(url, opts) {
-      //alert(`[load] url: ${url}`);
-      let response = await fetch(url, opts);
-      let data = await response.json();
+      alert(`LOAD   url: ${url}   this.load: ${JSON.stringify(opts)}`);
+      alert(`LOAD   url: ${url}   this.load: ${JSON.stringify(opts)}`);
+      const response = await fetch(url, opts);
+      const data = await response.json();
       const json = JSON.stringify(data);
-      //alert(`[load] json: ${json}`);
+      alert(`LOAD   json: ${json}`);
       const result = JSON.parse(json);
+      //this.torrents = result.slice(0, -1);
+      //await this.$nextTick();
+      /*
+        this.$nextTick(() => {});
+        */
+      //this.$forceUpdate();
+      alert(`LOAD   result: ${json}`);
       return result;
     },
 
-    submit() {
-      //e.preventDefault();
+    submit(e) {
+      e.preventDefault();
+
       /* alert(
           `submit \n url: ${this.url} \n formValue: ${JSON.stringify(
             this.formValue
@@ -165,16 +165,18 @@ export default {
         this.options
       );
 
-      // this.torrents.length = 0;
-      //this.error = null;
+      this.torrents.length = 0;
+      // this.error = null;
 
       // console.log(`opts: ${JSON.stringify(opts)}`);
-      // alert(`opts: ${JSON.stringify(opts)}`);
+      //alert(`options: : ${JSON.stringify(options)}`);
       const result = this.load(this.url, options);
-      //this.torrents = [...result];
-
-      //alert(`this.torrents: ${JSON.stringify(this.torrents)}`);
-      result
+      this.$forceUpdate();
+      this.torrents = result.slice(0, -1);
+      this.$forceUpdate();
+      alert(`SUBMIT   this.torrents: ${JSON.stringify(this.torrents)}`);
+      /*
+        result
         .then(function (torrents) {
           alert(`torrents [${typeof torrents}]: ${JSON.stringify(torrents)}`);
           //this.torrents = this.torrents.concat(torrents);
@@ -187,17 +189,18 @@ export default {
 
           this.torrents = [...torrents];
 
-          //Promise.resolve(this.torrents);
+          Promise.resolve(this.torrents);
 
-          //return false;
+          return false;
         })
         .catch(function (error) {
           this.error = error.toString();
           alert(`Error: ${this.error}`);
           console.error("Error: ", this.error);
         });
+        */
 
-      //return false;
+      return false;
     }
   }
 };

@@ -5,7 +5,7 @@ const polka = require("polka");
 const send = require("@polka/send-type");
 const {json} = require("body-parser");
 const morgan = require("morgan");
-// const compress = require("compression");
+//const compress = require("compression");
 const sirv = require("sirv");
 // const cookieParser = require("cookie-parser");
 const cors = require("cors");
@@ -34,26 +34,24 @@ const {
 const isDev = NODE_ENV !== "production";
 
 // const { handler } =
-//cookieParser(),
 polka()
   .use(
-    morgan(isDev ? "dev" : "tiny", {
-      immediate: isDev
-    }),
     cors({
-      origin: "*",
-      methods: ["GET", "POST"],
-      maxAge: 8600
+      origin: true
     }),
-    json(),
-    //compress(),
-    sirv("public")
+    morgan(isDev ? "dev" : "tiny"),
+    json()
   )
   .post(TORRENTS_API, async (req, res) => {
+    // res.headers["Access-Control-Allow-Origin"] = "*";
+
     try {
-      //res.headers["Access-Control-Allow-Origin"] = "*";
-      let jsonStr = JSON.stringify(req.body);
-      let {query = "vscode", category = "App", limit = 1} = JSON.parse(jsonStr);
+      const jsonStr = JSON.stringify(req.body);
+      const {
+        query = "vscode",
+        category = "App",
+        limit = 1
+      } = JSON.parse(jsonStr);
 
       console.log(
         `\n{"query": "${query}", "category": "${category}", "limit": ${limit} }\n`
@@ -61,12 +59,11 @@ polka()
 
       const torrents = await TorrentSearchApi.search(query, category, limit);
 
-      console.log(`\n{ "torrents": ${JSON.stringify(torrents)} }\n`);
-
       if (!torrents || !torrents.length) {
         send(res, statusMsg.empty, warning.notorrents);
       } else {
-        let filtered = torrents.filter(
+        let indexed = torrents.map((t, idx) => Object.assign({id: idx}, t));
+        let filtered = indexed.filter(
           (x) =>
             x &&
             x.peers &&
@@ -75,7 +72,8 @@ polka()
             parseInt(x.seeds) >= 1
         );
 
-        send(res, statusMsg.success, filtered, headers.json);
+        console.log(`\n{ "filtered": ${JSON.stringify(filtered)} }\n`);
+        send(res, statusMsg.success, JSON.stringify(filtered), headers.json);
       }
     } catch (err) {
       send(res, statusMsg.fail, warning.notorrents);

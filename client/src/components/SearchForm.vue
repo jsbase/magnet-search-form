@@ -60,10 +60,8 @@
             <a :href="torrent.desc">{{ torrent.desc }}</a>
           </p>
         </li>
-        <!--
-                                                        <li v-if="torrents && torrents.length === 0">No results.</li>
-                                                        <li v-if="error">{{ error }}</li>
-                                                        -->
+        <li v-if="torrents && torrents.length === 0">No results.</li>
+        <li v-if="error">{{ error }}</li>
       </ul>
     </div>
   </section>

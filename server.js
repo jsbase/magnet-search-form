@@ -34,19 +34,19 @@ const {
 const isDev = NODE_ENV !== "production";
 
 // const { handler } =
-//cookieParser(),
+// cookieParser(),
 polka()
   .use(
-    morgan(isDev ? "dev" : "tiny", {
+    morgan(isDev ? "" : "tiny", {
       immediate: isDev
     }),
     cors({
       origin: "*",
       methods: ["GET", "POST"],
       maxAge: 8600
+      //compress(),
     }),
     json(),
-    //compress(),
     sirv("public")
   )
   .post(TORRENTS_API, async (req, res) => {
@@ -55,13 +55,13 @@ polka()
       let jsonStr = JSON.stringify(req.body);
       let {query = "vscode", category = "App", limit = 1} = JSON.parse(jsonStr);
 
-      console.log(
+      /*console.log(
         `\n{"query": "${query}", "category": "${category}", "limit": ${limit} }\n`
-      );
+      );*/
 
       const torrents = await TorrentSearchApi.search(query, category, limit);
 
-      console.log(`\n{ "torrents": ${JSON.stringify(torrents)} }\n`);
+      // console.log(`\n{ "torrents": ${JSON.stringify(torrents)} }\n`);
 
       if (!torrents || !torrents.length) {
         send(res, statusMsg.empty, warning.notorrents);

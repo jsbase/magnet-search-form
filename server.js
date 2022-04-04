@@ -53,11 +53,13 @@ polka()
         limit = 1
       } = JSON.parse(jsonStr);
 
-      console.log(
+      /*console.log(
         `\n{"query": "${query}", "category": "${category}", "limit": ${limit} }\n`
-      );
+      );*/
 
       const torrents = await TorrentSearchApi.search(query, category, limit);
+
+      // console.log(`\n{ "torrents": ${JSON.stringify(torrents)} }\n`);
 
       if (!torrents || !torrents.length) {
         send(res, statusMsg.empty, warning.notorrents);

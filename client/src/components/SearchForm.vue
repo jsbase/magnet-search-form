@@ -60,6 +60,8 @@
             <a :href="torrent.desc">{{ torrent.desc }}</a>
           </p>
         </li>
+        <!--<li v-if="torrents && torrents.length === 0">No results.</li>-->
+        <!--<li v-if="error">{{ error }}</li>-->
       </ul>
     </div>
   </section>
@@ -69,13 +71,11 @@
 export default {
   name: "SearchForm",
 
-  /* computed: {
+  computed: {
     log: function () {
       return console.table(this.torrents);
     }
-    //url: `${this.protocol}://${this.host}:${this.port}${this.torrentsApi}
   },
-  */
 
   data() {
     return {
@@ -96,7 +96,6 @@ export default {
         }
       }
     };
-
     //error: null,
     //Referer: "http://localhost:3000/torrents",
     //Connection: "Keep-Alive",
@@ -104,8 +103,7 @@ export default {
     //"Cache-Control": "no-cache"
   },
 
-  /*
-    created() {
+  /* created() {
     const options = Object.assign(
       {
         body: JSON.stringify(this.formValue)
@@ -127,29 +125,26 @@ export default {
         //alert(`error: ${typeof error === "string" ? error : JSON.stringify(error)}`);
         console.error("Error: ", error);
       });
-    },
-    */
+    }, */
   methods: {
     async load(url, opts) {
-      alert(`LOAD   url: ${url}   this.load: ${JSON.stringify(opts)}`);
-      alert(`LOAD   url: ${url}   this.load: ${JSON.stringify(opts)}`);
+      // alert(`LOAD   url: ${url}   this.load: ${JSON.stringify(opts)}`);
+      // alert(`LOAD   url: ${url}   this.load: ${JSON.stringify(opts)}`);
       const response = await fetch(url, opts);
       const data = await response.json();
       const json = JSON.stringify(data);
-      alert(`LOAD   json: ${json}`);
+      // alert(`LOAD   json: ${json}`);
       const result = JSON.parse(json);
-      //this.torrents = result.slice(0, -1);
-      //await this.$nextTick();
-      /*
-        this.$nextTick(() => {});
-        */
-      //this.$forceUpdate();
-      alert(`LOAD   result: ${json}`);
+      // this.torrents = result.slice(0, -1);
+      // await this.$nextTick();
+      // this.$nextTick(() => {});
+      // this.$forceUpdate();
+      // alert(`LOAD   result: ${json}`);
       return result;
     },
 
-    submit(e) {
-      e.preventDefault();
+    submit() {
+      // e.preventDefault();
 
       /* alert(
           `submit \n url: ${this.url} \n formValue: ${JSON.stringify(
@@ -171,7 +166,7 @@ export default {
       // console.log(`opts: ${JSON.stringify(opts)}`);
       //alert(`options: : ${JSON.stringify(options)}`);
       const result = this.load(this.url, options);
-      this.$forceUpdate();
+      // this.$forceUpdate();
       this.torrents = result.slice(0, -1);
       this.$forceUpdate();
       alert(`SUBMIT   this.torrents: ${JSON.stringify(this.torrents)}`);

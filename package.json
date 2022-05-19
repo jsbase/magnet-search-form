@@ -46,7 +46,7 @@
     "polka": "^0.5.2",
     "prettier": "^2.6.0",
     "prettier-eslint": "^14.0.2",
-    "prettier-eslint-cli": "^5.0.1",
+    "prettier-eslint-cli": "^6.0.1",
     "sirv": "^2.0.2"
   },
   "snyk": true
